@@ -188,7 +188,9 @@ const Register = () => {
                                 </div>
                                 <div className="flex items-center gap-3 py-2">
                                     <input type="checkbox" id="terms" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} required className="w-5 h-5 rounded-lg border-border text-plaiz-blue focus:ring-blue-50 bg-surface grayscale dark:grayscale-0" />
-                                    <label htmlFor="terms" className="text-[10px] font-bold text-muted uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors">I agree to the terms</label>
+                                    <label htmlFor="terms" className="text-[10px] font-bold text-muted uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors">
+                                        I agree to <Link to="/terms" className="text-plaiz-blue hover:underline underline-offset-4">the terms</Link>
+                                    </label>
                                 </div>
                             </div>
 
