@@ -52,10 +52,10 @@ const Portfolio = () => {
         <div className="min-h-screen bg-transparent relative overflow-x-hidden">
             <Navbar />
 
-            <div className="container mx-auto px-6 pt-56 pb-20 relative z-10">
+            <div className="container mx-auto px-6 pt-80 pb-20 relative z-10">
                 {/* Header */}
-                <div className="max-w-3xl mx-auto text-center mb-20 animate-fade-in">
-                    <h2 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-foreground">
+                <div className="max-w-3xl mx-auto text-center mb-24 animate-fade-in mt-12">
+                    <h2 className="text-5xl md:text-8xl font-black mb-8 tracking-tighter text-foreground">
                         Our <span className="text-plaiz-blue transition-all duration-500">Portfolio</span>
                     </h2>
                     <p className="text-muted text-lg md:text-xl font-medium leading-relaxed mb-12">
