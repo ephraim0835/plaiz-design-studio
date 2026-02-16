@@ -16,7 +16,7 @@ const Footer = () => {
                             <span className="font-extrabold text-2xl tracking-tight text-foreground text-nowrap">PLAÍZ STUDIO</span>
                         </Link>
                         <p className="text-muted text-lg font-medium leading-relaxed max-w-sm">
-                            Get quality designs without stress. We connect you with top-tier creatives for all your design and tech needs.
+                            Plaiz Studio is a managed digital services platform currently specializing in graphic design, web design, and printing, with more solutions coming soon.
                         </p>
                         <div className="flex items-center gap-4">
                             <a
@@ -47,7 +47,7 @@ const Footer = () => {
                             </ul>
                         </div>
                         <div className="space-y-6">
-                            <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted">Design Hub</h4>
+                            <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted">Service Hub</h4>
                             <ul className="space-y-4">
                                 {['Graphic Design', 'Web Design', 'Printing Services'].map(item => (
                                     <li key={item}><Link to="#" className="text-sm font-bold text-muted hover:text-plaiz-blue transition-colors">{item}</Link></li>

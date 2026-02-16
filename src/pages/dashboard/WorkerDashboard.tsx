@@ -72,7 +72,7 @@ const WorkerDashboard: React.FC = () => {
     if (assignedLoading) return <LoadingScreen message="Syncing Grid Assignments..." />;
 
     return (
-        <DashboardLayout title="Designer Studio" hideBottomNav={!!selectedProjectId}>
+        <DashboardLayout title="Expert Studio" hideBottomNav={!!selectedProjectId}>
             <div className="space-y-12 pb-20">
                 {/* Friendly Greeting */}
                 <div className="mb-0">
@@ -80,7 +80,7 @@ const WorkerDashboard: React.FC = () => {
                         Hi {profile?.full_name?.split(' ')[0] || 'Expert'} <span className="text-plaiz-blue/60 inline-block">👋</span>
                     </h1>
                     <p className="text-xl md:text-2xl text-muted font-medium">
-                        What are we creating today? <span className="text-plaiz-blue">Let's build excellence.</span>
+                        What are we providing today? <span className="text-plaiz-blue">Let's build excellence.</span>
                     </p>
                 </div>
 

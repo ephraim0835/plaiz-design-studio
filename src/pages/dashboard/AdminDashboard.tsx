@@ -147,7 +147,7 @@ const AdminDashboard: React.FC = () => {
                                     System Status: <span className="text-plaiz-blue uppercase">Optimal</span> 🔋
                                 </h1>
                                 <p className="text-muted font-medium max-w-lg text-lg">
-                                    Monitor studio performance, manage assignments, and <span className="text-foreground font-bold">ensure quality across all experts.</span>
+                                    Monitor platform performance, manage assignments, and <span className="text-foreground font-bold">ensure quality across all experts.</span>
                                 </p>
                             </div>
                             <div className="absolute top-0 right-0 w-1/4 h-full bg-plaiz-blue/5 blur-[100px] rounded-full translate-x-1/2" />

@@ -18,7 +18,7 @@ const SERVICES = [
     {
         id: 'web',
         title: 'Web Design',
-        description: 'High-performance websites built to convert visitors into paying customers.',
+        description: 'High-performance websites and digital solutions built to convert.',
         icon: Code,
         price: 'From ₦100k',
         rating: 4.8,

@@ -16,26 +16,26 @@ const Landing = () => {
         {
             icon: Palette,
             title: 'Graphic Design',
-            desc: 'Logos, branding, and everything your brand needs to look great.',
+            desc: 'Creative solutions from logos to full branding, managed for quality.',
             price: 'From ₦3k',
             image: '/graphic_design_service.png',
-            tag: 'Top Pick'
+            tag: 'Visuals'
         },
         {
             icon: Layout,
             title: 'Web Design',
-            desc: 'High-performance websites built to convert visitors into paying customers.',
+            desc: 'High-performance websites and digital experiences built to convert.',
             price: 'From ₦100k',
             image: '/web_design_service.png',
-            tag: 'Most Active'
+            tag: 'Digital'
         },
         {
             icon: Printer,
-            title: 'Print Services',
-            desc: 'We print everything printable — from business cards, flyers, banners, packaging, apparel, signage, and merchandise to fully custom personal and corporate prints in any size or quantity.',
+            title: 'Print Production',
+            desc: 'Premium printing for business cards, banners, apparel, and custom merchandise.',
             price: 'From ₦5k',
             image: '/printing_service.png',
-            tag: 'Fast Delivery'
+            tag: 'Production'
         }
     ];
 
@@ -60,12 +60,12 @@ const Landing = () => {
                     </div>
 
                     <h1 className="text-6xl md:text-8xl lg:text-[110px] font-black text-foreground mb-10 leading-[0.9] tracking-tighter animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100 italic">
-                        Designs that help <br className="hidden md:block" />
-                        <span className="not-italic">you move </span> <span className="text-plaiz-blue">forward.</span>
+                        Professional Digital Services, <br className="hidden md:block" />
+                        <span className="not-italic">Managed </span> <span className="text-plaiz-blue">End-to-End.</span>
                     </h1>
 
                     <p className="text-xl md:text-3xl text-muted max-w-3xl mb-16 leading-tight font-bold tracking-tight animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-                        Professional services that make your ideas easier to share, sell, and grow.
+                        Plaiz Studio provides reliable digital services including graphic design, web design, and printing — with more services expanding soon.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center gap-8 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
@@ -88,8 +88,8 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-32 flex flex-col lg:flex-row lg:items-end justify-between gap-10">
                         <div className="max-w-2xl">
-                            <h2 className="mb-6 text-foreground tracking-tighter font-black text-5xl lg:text-7xl">What we do.</h2>
-                            <p className="text-muted text-xl font-bold tracking-tight">Clear services. Real results.</p>
+                            <h2 className="mb-6 text-foreground tracking-tighter font-black text-5xl lg:text-7xl">Active Services.</h2>
+                            <p className="text-muted text-xl font-bold tracking-tight">Managed digital solutions. Real results.</p>
                         </div>
                         <div className="flex items-center gap-4 text-muted/40 font-black uppercase text-[10px] tracking-[0.2em]">
                             <span className="w-12 h-0.5 bg-border" /> Quality First
@@ -139,9 +139,9 @@ const Landing = () => {
                 <div className="max-w-6xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
                         <div>
-                            <h2 className="mb-10 text-foreground text-5xl lg:text-7xl leading-[0.95] tracking-tighter font-black">Work with verified <br />creatives who deliver.</h2>
+                            <h2 className="mb-10 text-foreground text-5xl lg:text-7xl leading-[0.95] tracking-tighter font-black">Managed digital services <br />that deliver.</h2>
                             <p className="text-xl text-muted mb-16 leading-relaxed font-bold tracking-tight">
-                                Your project, handled by real experts. Simple process. Clear communication. Useful results.
+                                Plaiz Studio connects clients with skilled professionals to deliver high-quality digital services. We currently focus on graphic design, web design, and printing, while continuously expanding into more service areas.
                             </p>
 
                             <div className="space-y-12">
@@ -187,7 +187,7 @@ const Landing = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-plaiz-blue/20 to-plaiz-cyan/10 pointer-events-none" />
                 <div className="relative z-10 max-w-5xl mx-auto">
                     <h2 className="text-white mb-10 text-5xl lg:text-9xl font-black tracking-tighter leading-[0.85]">Ready to start? <br />Let's work together.</h2>
-                    <p className="text-white/40 mb-16 text-2xl font-bold tracking-tight max-w-2xl mx-auto leading-relaxed">Get matched with the right expert for your project. Clear pricing. Real results.</p>
+                    <p className="text-white/40 mb-16 text-2xl font-bold tracking-tight max-w-2xl mx-auto leading-relaxed">Plaiz Studio is a managed digital services platform currently specializing in graphic design, web design, and printing solutions.</p>
                     <Link to="/register">
                         <button className="px-16 py-7 bg-studio-light text-studio-dark rounded-[24px] font-black uppercase tracking-[0.3em] shadow-[0_25px_60px_rgba(255,255,255,0.1)] hover:scale-[105] active:scale-[0.95] transition-all text-xs mb-12">
                             Start a Project

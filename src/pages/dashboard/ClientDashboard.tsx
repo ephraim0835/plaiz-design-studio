@@ -103,7 +103,7 @@ const ClientDashboard: React.FC = () => {
                             Your project stream is active.
                         </h1>
                         <p className="text-muted font-medium max-w-lg text-lg">
-                            Track your work and <span className="text-plaiz-blue">get simple design for your brand.</span>
+                            Track your work and <span className="text-plaiz-blue">get reliable digital services for your brand.</span>
                         </p>
                     </div>
                     <div className="absolute top-0 right-0 w-1/3 h-full bg-plaiz-blue/5 blur-[100px] rounded-full translate-x-1/2" />

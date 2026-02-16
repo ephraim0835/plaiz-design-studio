@@ -29,7 +29,7 @@ const HomeV2: FC = () => {
             id: 'web',
             title: 'Web Design',
             icon: Layout,
-            desc: 'High-performance websites built to convert visitors into paying customers.',
+            description: 'High-performance websites and digital solutions built to convert.',
             bg: 'bg-plaiz-cyan/10',
             iconColor: 'text-plaiz-cyan',
             border: 'border-plaiz-cyan/20'
@@ -63,7 +63,7 @@ const HomeV2: FC = () => {
                         Hi {firstName} <span className="text-plaiz-blue/60 group-hover:animate-bounce inline-block">👋</span>
                     </h1>
                     <p className="text-xl md:text-2xl text-muted font-medium">
-                        What can we build for you? <span className="text-plaiz-blue">Let's create something useful.</span>
+                        What can we build for you? <span className="text-plaiz-blue">Plaiz Studio is your managed digital services partner.</span>
                     </p>
                 </div>
 
