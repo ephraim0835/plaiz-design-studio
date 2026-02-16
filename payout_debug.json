@@ -1,0 +1,16 @@
+{
+  "id": "df7143ea-bae4-4a7a-902b-c6bd7f276d60",
+  "project_id": "63311201-2429-4fce-af19-c764eb9209a6",
+  "worker_id": "1da97a0f-386e-4baa-a7e5-06a10709c4c9",
+  "total_amount": 100,
+  "business_cut": 20,
+  "worker_cut": 80,
+  "worker_bank_info": {
+    "bank_name": "Moniepoint MFB",
+    "account_name": "EPHRAIM AYOKUNLE TACKIE OFOLI",
+    "account_number": "8145129596"
+  },
+  "status": "ready_for_transfer",
+  "processed_at": null,
+  "created_at": "2026-02-07T00:20:34.274567+00:00"
+}

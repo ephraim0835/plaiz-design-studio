@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Premium Soft Light Palette */
+  --bg-primary: #F2F2F5;
+  --bg-surface: #FFFFFF;
+  --bg-surface-hover: #F8FAFC;
+  --bg-background-hover: #EBEBEF;
+  --bg-muted: #F1F5F9;
+  --bg-accent: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-muted: #64748B;
+  --text-primary-foreground: #FFFFFF;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.05);
+
+  font-family: 'Outfit', system-ui, sans-serif;
+  color-scheme: light dark;
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.dark {
+  /* Premium Slate/Navy Dark Palette (Brand Aligned) */
+  --bg-primary: #020617;
+  /* Slate 950 - Deep Navy Background */
+  --bg-surface: #0F172A;
+  /* Slate 900 - Rich Navy Surface */
+  --bg-surface-hover: #1E293B;
+  --bg-background-hover: #0F172A;
+  --bg-muted: #1E293B;
+  /* Slate 800 - Lighter Navy for Inputs */
+  --bg-accent: #334155;
+  /* Slate 700 - Borders/Highlights */
+  --text-primary: #F8FAFC;
+  /* Slate 50 - Crisp White Text */
+  --text-muted: #94A3B8;
+  /* Slate 400 - Muted Blue-Grey */
+  --text-primary-foreground: #FFFFFF;
+  --border-color: rgba(148, 163, 184, 0.1);
+  /* Subtle Blue-Grey Border */
+  --shadow-color: rgba(2, 6, 23, 0.5);
+}
+
+* {
+  @apply transition-colors duration-300;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Global Transition Utility */
+.theme-transition {
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Custom Glassmorphism engine - Unified for both modes */
+.glass-panel {
+  @apply bg-surface border border-border shadow-soft backdrop-blur-xl relative overflow-hidden;
+}
+
+/* Update standard focus ring */
+:focus-visible {
+  @apply outline-none ring-2 ring-plaiz-blue ring-offset-2 ring-offset-background;
+}
+
+/* Legacy and Theme Logic Overrides */
+.ambient-bg-prof {
+  @apply bg-background;
+}
