@@ -20,8 +20,7 @@ import {
     Settings,
     Clock,
     Zap,
-    Banknote,
-    Key
+    Banknote
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -45,24 +44,13 @@ const AdminDashboard: React.FC = () => {
     const { workers, loading: workersLoading } = useWorkers();
 
     const [totalUsersCount, setTotalUsersCount] = useState<number>(0);
-    const [pendingInviteCodes, setPendingInviteCodes] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchUserCount = async () => {
             const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
             if (count !== null) setTotalUsersCount(count);
         };
-        const fetchPendingCodes = async () => {
-            const { data } = await supabase
-                .from('invite_codes')
-                .select('*')
-                .eq('used', false)
-                .order('created_at', { ascending: false })
-                .limit(5);
-            if (data) setPendingInviteCodes(data);
-        };
         fetchUserCount();
-        fetchPendingCodes();
     }, []);
 
     const [isEditing, setIsEditing] = useState<string | null>(null);
@@ -190,48 +178,6 @@ const AdminDashboard: React.FC = () => {
                                 <p className="text-xl font-black text-white truncate">Approve Work</p>
                             </Link>
                         </div>
-
-                        {/* Registration Codes Widget */}
-                        {pendingInviteCodes.length > 0 && (
-                            <div className="bg-amber-500/5 border border-amber-500/20 rounded-3xl p-8 animate-in slide-in-from-top-4 duration-700">
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-amber-500/20 rounded-lg text-amber-500">
-                                            <Key size={18} />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-foreground">Pending Registration Codes</h3>
-                                            <p className="text-xs text-muted font-medium">New specialists waiting for their access code.</p>
-                                        </div>
-                                    </div>
-                                    <Link to="/admin/users" className="text-[10px] font-black text-amber-500 uppercase tracking-widest hover:underline">Manage All</Link>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {pendingInviteCodes.map((code) => (
-                                        <div key={code.id} className="bg-surface border border-border/50 rounded-2xl p-5 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center font-mono font-black text-amber-500 text-xs tracking-tighter shadow-inner border border-border">
-                                                    {code.code}
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-black text-foreground truncate max-w-[120px]">{code.email}</p>
-                                                    <p className="text-[9px] text-muted font-bold uppercase tracking-widest">{code.role?.replace('_', ' ')}</p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(code.code);
-                                                    alert('Code copied!');
-                                                }}
-                                                className="p-2 text-muted hover:text-amber-500 transition-colors opacity-0 group-hover:opacity-100"
-                                            >
-                                                <Zap size={14} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         {/* Control Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative">
