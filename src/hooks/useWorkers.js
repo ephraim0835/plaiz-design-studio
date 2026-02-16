@@ -14,7 +14,7 @@ export const useWorkers = () => {
                 const { data, error: fetchError } = await supabase
                     .from('profiles')
                     .select('*, worker_stats(*)')
-                    .in('role', ['graphic_designer', 'web_designer'])
+                    .in('role', ['graphic_designer', 'web_designer', 'print_specialist'])
 
                 if (fetchError) throw fetchError
                 setWorkers(data || [])

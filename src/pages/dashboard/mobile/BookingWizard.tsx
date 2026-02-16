@@ -8,9 +8,17 @@ import LoadingScreen from '../../../components/LoadingScreen';
 import { useProjects } from '../../../hooks/useProjects';
 
 const SERVICE_MAP = {
-    graphic: { title: 'Graphic Design', icon: Zap, color: 'text-plaiz-blue', bg: 'bg-plaiz-blue/10', border: 'border-plaiz-blue/20' },
-    web: { title: 'Web Design', icon: LayoutIcon, color: 'text-plaiz-cyan', bg: 'bg-plaiz-cyan/10', border: 'border-plaiz-cyan/20' },
-    print: { title: 'Printing', icon: Printer, color: 'text-plaiz-coral', bg: 'bg-plaiz-coral/10', border: 'border-plaiz-coral/20' }
+    graphic_designer: { title: 'Graphic Design', icon: Zap, color: 'text-plaiz-blue', bg: 'bg-plaiz-blue/10', border: 'border-plaiz-blue/20' },
+    web_designer: { title: 'Web Design', icon: LayoutIcon, color: 'text-plaiz-cyan', bg: 'bg-plaiz-cyan/10', border: 'border-plaiz-cyan/20' },
+    print_specialist: { title: 'Printing', icon: Printer, color: 'text-plaiz-coral', bg: 'bg-plaiz-coral/10', border: 'border-plaiz-coral/20' }
+};
+
+const getNormalizedServiceType = (type: string | null): keyof typeof SERVICE_MAP => {
+    if (!type) return 'graphic_designer';
+    const t = type.toLowerCase();
+    if (t.includes('web')) return 'web_designer';
+    if (t.includes('print')) return 'print_specialist';
+    return 'graphic_designer';
 };
 
 const BookingWizard: React.FC = () => {
@@ -19,7 +27,7 @@ const BookingWizard: React.FC = () => {
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [formData, setFormData] = useState({
-        type: (searchParams.get('type') as keyof typeof SERVICE_MAP) || (searchParams.get('service') as keyof typeof SERVICE_MAP) || 'graphic',
+        type: getNormalizedServiceType(searchParams.get('type') || searchParams.get('service')),
         title: '',
         description: '',
         budget: '',
@@ -36,10 +44,10 @@ const BookingWizard: React.FC = () => {
     }, []);
 
     const totalSteps = 3;
-    const currentService = SERVICE_MAP[formData.type] || SERVICE_MAP.graphic;
+    const currentService = SERVICE_MAP[formData.type] || SERVICE_MAP.graphic_designer;
 
     const nextStep = () => {
-        if (formData.type === 'graphic' && step === 2) {
+        if (formData.type === 'graphic_designer' && step === 2) {
             setStep(step + 1); // Skip specialized step for graphic
             return;
         }
@@ -48,7 +56,7 @@ const BookingWizard: React.FC = () => {
     };
 
     const prevStep = () => {
-        if (formData.type === 'graphic' && step === 3) {
+        if (formData.type === 'graphic_designer' && step === 3) {
             setStep(step - 1);
             return;
         }
@@ -66,7 +74,9 @@ const BookingWizard: React.FC = () => {
         setError(null);
 
         try {
-            const serviceType = formData.type === 'web' ? 'web_design' : formData.type === 'print' ? 'printing' : 'graphic_design';
+            const serviceType = formData.type === 'web_designer' ? 'web_design' :
+                formData.type === 'print_specialist' ? 'printing' :
+                    'graphic_design';
 
             const result = await createProject({
                 title: formData.title,

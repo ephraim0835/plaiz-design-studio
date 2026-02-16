@@ -37,8 +37,9 @@ const ProjectRequest = () => {
         const service = params.get('type') || params.get('service');
         if (service) {
             let type = 'graphic_design';
-            if (service === 'print' || service === 'printing') type = 'printing';
-            if (service === 'web' || service === 'web_design') type = 'web_design';
+            if (service === 'print' || service === 'printing' || service === 'print_specialist') type = 'printing';
+            if (service === 'web' || service === 'web_design' || service === 'web_designer') type = 'web_design';
+            if (service === 'graphic_designer') type = 'graphic_design';
             setFormData(prev => ({ ...prev, service_type: type }));
         }
     }, [location.search]);
@@ -137,7 +138,10 @@ const ProjectRequest = () => {
 
             const { data: project, error: projectError } = await supabase
                 .from('projects')
-                .insert(projectData)
+                .insert({
+                    ...projectData,
+                    project_type: projectData.service_type // Ensure project_type is set for compatibility
+                })
                 .select()
                 .single();
 

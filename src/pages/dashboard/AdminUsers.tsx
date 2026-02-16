@@ -579,6 +579,7 @@ const AdminUsers: React.FC = () => {
                                             <option value="client">Client</option>
                                             <option value="graphic_designer">Graphic Designer</option>
                                             <option value="web_designer">Web Designer</option>
+                                            <option value="print_specialist">Print Specialist</option>
                                             <option value="worker">Worker (General)</option>
                                             <option value="admin">Admin</option>
                                         </select>
@@ -653,7 +654,9 @@ const AdminUsers: React.FC = () => {
                                         className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-plaiz-cyan focus:ring-1 focus:ring-plaiz-cyan outline-none transition-colors appearance-none"
                                     >
                                         <option value="client">Client</option>
-                                        <option value="worker">Specialist (Worker)</option>
+                                        <option value="graphic_designer">Graphic Designer</option>
+                                        <option value="web_designer">Web Designer</option>
+                                        <option value="print_specialist">Print Specialist</option>
                                         <option value="admin">Administrator</option>
                                     </select>
                                 </div>

@@ -3,21 +3,21 @@
 
 export const WORKER_SPECIALIZATIONS = [
     {
-        id: 'graphic_design',
+        id: 'graphic_designer',
         label: 'Graphic Designer',
         icon: 'Palette',
         description: 'Brand identity, logos, marketing materials',
         color: '#ec4899' // Pink
     },
     {
-        id: 'web_design',
+        id: 'web_designer',
         label: 'Web Designer',
         icon: 'Code',
         description: 'Websites, web apps, responsive design',
         color: '#3b82f6' // Blue
     },
     {
-        id: 'printing',
+        id: 'print_specialist',
         label: 'Printing Specialist',
         icon: 'Printer',
         description: 'Print materials, packaging, production',

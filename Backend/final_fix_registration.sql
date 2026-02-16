@@ -25,16 +25,18 @@ BEGIN
 
     -- Logic to determine proper enum role
     IF meta_role = 'worker' THEN
-        IF meta_spec = 'web_design' THEN
+        IF meta_spec = 'web_designer' THEN
             target_role := 'web_designer';
+        ELSIF meta_spec = 'print_specialist' THEN
+            target_role := 'print_specialist';
         ELSE
-            -- Default to graphic_designer for 'graphic_design' or any other worker type
             target_role := 'graphic_designer'; 
         END IF;
+    ELSIF meta_role IN ('graphic_designer', 'web_designer', 'print_specialist') THEN
+        target_role := meta_role::user_role_enum;
     ELSIF meta_role = 'admin' THEN
         target_role := 'admin';
     ELSE
-        -- Default fallback
         target_role := 'client';
     END IF;
 
@@ -82,7 +84,7 @@ CREATE TRIGGER on_auth_user_created
 CREATE OR REPLACE FUNCTION public.create_worker_stats_entry()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.role IN ('graphic_designer', 'web_designer', 'worker') THEN
+    IF NEW.role IN ('graphic_designer', 'web_designer', 'print_specialist', 'worker') THEN
         INSERT INTO public.worker_stats (worker_id)
         VALUES (NEW.id)
         ON CONFLICT (worker_id) DO NOTHING;
