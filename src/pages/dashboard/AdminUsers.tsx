@@ -14,7 +14,8 @@ import {
     Copy,
     AlertCircle,
     X,
-    History
+    History,
+    RefreshCw
 } from 'lucide-react';
 import { Profile, UserRole } from '../../types';
 import { useInviteCodes } from '../../hooks/useInviteCodes';
@@ -102,15 +103,22 @@ const AdminUsers: React.FC = () => {
     };
 
     const handleRevokeCode = async (id: string) => {
-        if (!confirm('Are you sure you want to revoke this access code?')) return;
+        if (!confirm('Are you sure you want to delete this access code? It will become unusable.')) return;
 
         const { error } = await supabase
             .from('invite_codes')
             .delete()
             .eq('id', id);
 
-        if (error) alert('Error revoking code');
+        if (error) alert('Error deleting code');
         else fetchInviteCodes();
+    };
+
+    const handleRegenerate = (email: string, role: UserRole) => {
+        setInviteEmail(email);
+        setInviteRole(role);
+        setGeneratedCode(null);
+        setShowInviteModal(true);
     };
 
     // ... existing handlers ...
@@ -447,13 +455,32 @@ const AdminUsers: React.FC = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <button
-                                                        onClick={() => handleRevokeCode(code.id)}
-                                                        className="p-2.5 rounded-xl bg-white/5 text-white/40 hover:bg-plaiz-coral/10 hover:text-plaiz-coral transition-all opacity-0 group-hover:opacity-100"
-                                                        title="Revoke Code"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(code.code);
+                                                                alert('Code copied!');
+                                                            }}
+                                                            className="p-2.5 rounded-xl bg-white/5 text-white/40 hover:bg-plaiz-blue/10 hover:text-plaiz-blue transition-all"
+                                                            title="Copy Code"
+                                                        >
+                                                            <Copy size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRegenerate(code.email, code.role)}
+                                                            className="p-2.5 rounded-xl bg-white/5 text-white/40 hover:bg-plaiz-cyan/10 hover:text-plaiz-cyan transition-all"
+                                                            title="Regenerate Code"
+                                                        >
+                                                            <RefreshCw size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRevokeCode(code.id)}
+                                                            className="p-2.5 rounded-xl bg-white/5 text-white/40 hover:bg-plaiz-coral/10 hover:text-plaiz-coral transition-all"
+                                                            title="Delete Code"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
