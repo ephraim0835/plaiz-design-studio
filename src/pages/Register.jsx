@@ -20,10 +20,18 @@ const Register = () => {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [termsAccepted, setTermsAccepted] = useState(false)
+    const [cooldown, setCooldown] = useState(0)
 
     const { signUp, signInWithGoogle } = useAuth()
     const { requestInviteCode, verifyInviteCode } = useInviteCodes()
     const navigate = useNavigate()
+
+    React.useEffect(() => {
+        if (cooldown > 0) {
+            const timer = setInterval(() => setCooldown(c => c - 1), 1000)
+            return () => clearInterval(timer)
+        }
+    }, [cooldown])
 
     const handlePasswordChange = (pwd) => {
         setPassword(pwd)
@@ -31,9 +39,12 @@ const Register = () => {
 
     const handleRequestCode = async () => {
         if (!email) return setError('Email is required to request access.')
+        if (cooldown > 0) return
+
         const result = await requestInviteCode(email, role)
         if (result.success) {
             setCodeRequested(true)
+            setCooldown(60)
             setSuccess(`Request sent! Ask the Admin for your 6-digit access code.`)
         } else {
             setError(result.error)
@@ -143,20 +154,33 @@ const Register = () => {
                             {(role === 'worker' || role === 'admin') && (
                                 <div className="p-6 bg-amber-50/10 backdrop-blur-sm rounded-2xl border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
                                     <div className="flex items-center gap-2 mb-3 font-black text-amber-600 italic"><Info size={14} /> Admin code needed</div>
-                                    {!codeRequested ? (
-                                        <button type="button" onClick={handleRequestCode} className="text-amber-500 underline font-black">Request a code</button>
-                                    ) : (
-                                        <div className="mt-4">
-                                            <input
-                                                type="text"
-                                                placeholder="6-Digit Code"
-                                                value={inviteCode}
-                                                onChange={(e) => setInviteCode(e.target.value)}
-                                                maxLength={6}
-                                                className="w-full h-12 px-5 bg-surface border border-amber-500/30 rounded-xl text-amber-500 font-black tracking-[0.4em] placeholder:tracking-normal placeholder:font-medium shadow-inner"
-                                            />
-                                        </div>
-                                    )}
+                                    <div className="flex flex-col gap-2">
+                                        {!codeRequested || cooldown > 0 ? (
+                                            <button
+                                                type="button"
+                                                onClick={handleRequestCode}
+                                                disabled={cooldown > 0}
+                                                className={`text-left font-black transition-all ${cooldown > 0 ? 'text-amber-500/40 cursor-not-allowed' : 'text-amber-500 underline'}`}
+                                            >
+                                                {cooldown > 0 ? `Resend in ${cooldown}s` : 'Request a code'}
+                                            </button>
+                                        ) : (
+                                            <button type="button" onClick={handleRequestCode} className="text-left text-amber-500 underline font-black">Resend code</button>
+                                        )}
+
+                                        {codeRequested && (
+                                            <div className="mt-4">
+                                                <input
+                                                    type="text"
+                                                    placeholder="6-Digit Code"
+                                                    value={inviteCode}
+                                                    onChange={(e) => setInviteCode(e.target.value)}
+                                                    maxLength={6}
+                                                    className="w-full h-12 px-5 bg-surface border border-amber-500/30 rounded-xl text-amber-500 font-black tracking-[0.4em] placeholder:tracking-normal placeholder:font-medium shadow-inner"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
