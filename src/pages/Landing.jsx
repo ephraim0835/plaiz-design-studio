@@ -60,12 +60,12 @@ const Landing = () => {
                     </div>
 
                     <h1 className="text-6xl md:text-8xl lg:text-[110px] font-black text-foreground mb-10 leading-[0.9] tracking-tighter animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100 italic">
-                        Managed <br className="hidden md:block" />
-                        <span className="not-italic">Digital </span> <span className="text-plaiz-blue">Services.</span>
+                        Services that <br className="hidden md:block" />
+                        <span className="not-italic">help you </span> <span className="text-plaiz-blue">move forward.</span>
                     </h1>
 
-                    <p className="text-xl md:text-3xl text-muted max-w-2xl mb-16 leading-tight font-bold tracking-tight animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-                        Design, Web, and Printing. <br className="hidden md:block" /> Handled from start to finish.
+                    <p className="text-xl md:text-3xl text-muted max-w-3xl mb-16 leading-tight font-bold tracking-tight animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
+                        Creative and practical solutions for individuals, and businesses to design, build, print, and grow.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center gap-8 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
