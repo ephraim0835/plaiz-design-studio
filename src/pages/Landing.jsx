@@ -141,7 +141,7 @@ const Landing = () => {
                         <div>
                             <h2 className="mb-10 text-foreground text-5xl lg:text-7xl leading-[0.95] tracking-tighter font-black">Managed digital services <br />that deliver.</h2>
                             <p className="text-xl text-muted mb-16 leading-relaxed font-bold tracking-tight">
-                                Plaiz Studio connects clients with skilled professionals to deliver high-quality digital services. We currently focus on graphic design, web design, and printing, while continuously expanding into more service areas.
+                                High-quality digital services delivered by experts. Currently focusing on graphic design, web design, and printing while expanding into more service areas.
                             </p>
 
                             <div className="space-y-12">
@@ -187,7 +187,7 @@ const Landing = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-plaiz-blue/20 to-plaiz-cyan/10 pointer-events-none" />
                 <div className="relative z-10 max-w-5xl mx-auto">
                     <h2 className="text-white mb-10 text-5xl lg:text-9xl font-black tracking-tighter leading-[0.85]">Ready to start? <br />Let's work together.</h2>
-                    <p className="text-white/40 mb-16 text-2xl font-bold tracking-tight max-w-2xl mx-auto leading-relaxed">Plaiz Studio is a managed digital services platform currently specializing in graphic design, web design, and printing solutions.</p>
+                    <p className="text-white/40 mb-16 text-2xl font-bold tracking-tight max-w-2xl mx-auto leading-relaxed">Managed digital services specializing in design, web, and printing solutions.</p>
                     <Link to="/register">
                         <button className="px-16 py-7 bg-studio-light text-studio-dark rounded-[24px] font-black uppercase tracking-[0.3em] shadow-[0_25px_60px_rgba(255,255,255,0.1)] hover:scale-[105] active:scale-[0.95] transition-all text-xs mb-12">
                             Start a Project

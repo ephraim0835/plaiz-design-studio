@@ -16,7 +16,7 @@ const Footer = () => {
                             <span className="font-extrabold text-2xl tracking-tight text-foreground text-nowrap">PLAÍZ STUDIO</span>
                         </Link>
                         <p className="text-muted text-lg font-medium leading-relaxed max-w-sm">
-                            Plaiz Studio is a managed digital services platform currently specializing in graphic design, web design, and printing, with more solutions coming soon.
+                            Managed digital services. Design, Web, and Printing solutions, with more expanding soon.
                         </p>
                         <div className="flex items-center gap-4">
                             <a
