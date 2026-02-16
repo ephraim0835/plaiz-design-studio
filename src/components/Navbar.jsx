@@ -24,6 +24,26 @@ const Navbar = () => {
         { label: 'About', path: '/about' },
     ];
 
+    const handleScrollTo = (e, path) => {
+        if (path.includes('#')) {
+            const [basePath, hash] = path.split('#');
+            if (location.pathname === basePath || (location.pathname === '/' && basePath === '/')) {
+                e.preventDefault();
+                const element = document.getElementById(hash);
+                if (element) {
+                    const offset = 80; // Adjust for sticky header
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+                setIsOpen(false);
+            }
+        }
+    };
+
     const isDashboard = location.pathname.startsWith('/client') ||
         location.pathname.startsWith('/worker') ||
         location.pathname.startsWith('/admin') ||
@@ -53,6 +73,7 @@ const Navbar = () => {
                             <Link
                                 key={link.label}
                                 to={link.path}
+                                onClick={(e) => handleScrollTo(e, link.path)}
                                 className="text-[11px] font-bold text-foreground hover:text-plaiz-blue transition-colors uppercase tracking-[0.15em] relative group/link"
                             >
                                 {link.label}
@@ -102,7 +123,10 @@ const Navbar = () => {
                                 <Link
                                     key={link.label}
                                     to={link.path}
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={(e) => {
+                                        handleScrollTo(e, link.path);
+                                        if (!link.path.includes('#')) setIsOpen(false);
+                                    }}
                                     className="group flex items-center gap-6 w-full max-w-xs p-6 rounded-[28px] bg-[var(--card-bg)]/40 border border-[var(--border-color)] hover:border-plaiz-blue/50 transition-all animate-in slide-in-from-bottom-8 overflow-hidden"
                                     style={{ animationDelay: `${idx * 100}ms` }}
                                 >
