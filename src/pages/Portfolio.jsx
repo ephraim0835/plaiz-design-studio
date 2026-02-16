@@ -4,7 +4,7 @@ import Footer from '../components/Footer'
 import { supabase } from '../lib/supabaseClient'
 import PortfolioGrid from '../components/portfolio/PortfolioGrid'
 
-const categories = ['All Projects', 'Web Design', 'Graphic Design', 'Printing']
+const categories = ['All Projects', 'Graphic Design', 'Web Design', 'Printing']
 
 const Portfolio = () => {
     const [selectedCategory, setSelectedCategory] = useState('All Projects')
@@ -27,8 +27,8 @@ const Portfolio = () => {
                         avatar_url
                     )
                 `)
-                .eq('is_approved', true) // PUBLIC PORTFOLIO ONLY SHOWS APPROVED
-                .order('created_at', { ascending: false })
+                .eq('is_approved', true)
+                .order('created_at', { ascending: false }) // IDENTICAL SORTING AS GALLERY
 
             if (error) throw error
             setProjects(data || [])
@@ -43,7 +43,8 @@ const Portfolio = () => {
         ? projects
         : projects.filter(project => {
             const cat = project.service_type === 'web' ? 'Web Design' :
-                project.service_type === 'printing' ? 'Printing' : 'Graphic Design';
+                project.service_type === 'printing' ? 'Printing' :
+                    project.service_type === 'graphics' ? 'Graphic Design' : 'Graphic Design';
             return cat === selectedCategory;
         })
 

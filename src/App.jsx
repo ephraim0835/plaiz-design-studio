@@ -12,6 +12,7 @@ import Landing from './pages/Landing'
 import Portfolio from './pages/Portfolio'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import About from './pages/About'
 import TermsAndConditions from './pages/TermsAndConditions'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import CookiePolicy from './pages/CookiePolicy'
@@ -129,6 +130,7 @@ function App() {
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/about" element={<About />} />
 
               <Route path="/terms" element={<TermsAndConditions />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
