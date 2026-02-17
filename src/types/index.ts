@@ -138,6 +138,7 @@ export interface PortfolioItem {
     ai_polished_description?: string;
     is_approved: boolean;
     is_featured: boolean;
+    website_link?: string;
     created_at: string;
     profiles?: {
         full_name: string;

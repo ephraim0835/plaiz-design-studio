@@ -4,6 +4,7 @@ import { X, Sparkles, Loader2, CheckCircle } from 'lucide-react';
 
 const PortfolioSubmissionModal = ({ isOpen, onClose, project }) => {
     const [description, setDescription] = useState('');
+    const [websiteLink, setWebsiteLink] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
@@ -29,6 +30,7 @@ const PortfolioSubmissionModal = ({ isOpen, onClose, project }) => {
                     image_url: project.final_file,
                     service_type: project.service_type,
                     description: description,
+                    website_link: websiteLink,
                     ai_polished_description: polished || description
                 });
 
@@ -39,6 +41,7 @@ const PortfolioSubmissionModal = ({ isOpen, onClose, project }) => {
                 onClose();
                 setSuccess(false);
                 setDescription('');
+                setWebsiteLink('');
             }, 2000);
 
         } catch (error) {
@@ -97,6 +100,21 @@ const PortfolioSubmissionModal = ({ isOpen, onClose, project }) => {
                                     AI will polish your description
                                 </p>
                             </div>
+
+                            {project.service_type === 'web' && (
+                                <div>
+                                    <label className="text-xs font-bold text-white/40 uppercase tracking-widest block mb-2">
+                                        Website Link (Optional)
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={websiteLink}
+                                        onChange={(e) => setWebsiteLink(e.target.value)}
+                                        placeholder="https://example.com"
+                                        className="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-plaiz-blue focus:ring-1 focus:ring-plaiz-blue outline-none transition-colors"
+                                    />
+                                </div>
+                            )}
 
                             <div className="flex gap-3">
                                 <button

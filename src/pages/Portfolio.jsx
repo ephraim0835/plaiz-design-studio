@@ -15,6 +15,18 @@ const Portfolio = () => {
         fetchProjects()
     }, [])
 
+    // Real-time update subscription
+    useEffect(() => {
+        const subscription = supabase
+            .channel('portfolio-public-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'portfolio' }, () => {
+                fetchProjects()
+            })
+            .subscribe()
+
+        return () => { subscription.unsubscribe() }
+    }, [])
+
     const fetchProjects = async () => {
         try {
             setLoading(true)
@@ -27,7 +39,7 @@ const Portfolio = () => {
                     )
                 `)
                 .eq('is_approved', true)
-                .order('created_at', { ascending: false }) // IDENTICAL SORTING AS GALLERY
+                .order('created_at', { ascending: false })
 
             if (error) throw error
             setProjects(data || [])

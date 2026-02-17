@@ -19,6 +19,7 @@ const GalleryTab = () => {
     const [newCategory, setNewCategory] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+    const [newWebsiteLink, setNewWebsiteLink] = useState('');
 
     const isWorker = ['graphic_designer', 'web_designer', 'designer', 'developer', 'print_specialist', 'video_editor', 'worker'].includes(role || '');
     const isAdmin = role === 'admin';
@@ -126,6 +127,7 @@ const GalleryTab = () => {
                         worker_id: profile?.id,
                         title: newTitle,
                         description: newDescription,
+                        website_link: newWebsiteLink,
                         image_url: publicUrl,
                         service_type: newCategory,
                         is_approved: true, // Auto-approve all uploads
@@ -141,6 +143,7 @@ const GalleryTab = () => {
             setIsModalOpen(false);
             setNewTitle('');
             setNewDescription('');
+            setNewWebsiteLink('');
             setSelectedFiles([]);
             setPreviewUrls([]);
             fetchGallery();
@@ -308,6 +311,19 @@ const GalleryTab = () => {
                                 />
                             </div>
 
+                            {newCategory === 'web' && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 px-2">Website Link (Optional)</label>
+                                    <input
+                                        type="url"
+                                        value={newWebsiteLink}
+                                        onChange={(e) => setNewWebsiteLink(e.target.value)}
+                                        placeholder="https://example.com"
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-medium focus:border-plaiz-blue/50 transition-all outline-none"
+                                    />
+                                </div>
+                            )}
+
                             <button
                                 type="submit"
                                 disabled={uploading || selectedFiles.length === 0}
@@ -326,7 +342,7 @@ const GalleryTab = () => {
                             </button>
                         </form>
                     </div>
-                </div>
+                </div >
             )}
 
             <div className="space-y-10 animate-fade-in pb-12">
@@ -451,7 +467,7 @@ const GalleryTab = () => {
                     </div>
                 )}
             </div>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 };
 
