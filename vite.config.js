@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['vite.svg', 'logo.png', 'plaiz-logo.png'],
       manifest: {
         name: 'Plaiz Design Studio',
         short_name: 'Plaiz',
