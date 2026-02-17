@@ -141,7 +141,6 @@ export interface PortfolioItem {
     created_at: string;
     profiles?: {
         full_name: string;
-        avatar_url: string;
     };
 }
 

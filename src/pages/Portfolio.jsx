@@ -23,8 +23,7 @@ const Portfolio = () => {
                 .select(`
                     *,
                     profiles:worker_id (
-                        full_name,
-                        avatar_url
+                        full_name
                     )
                 `)
                 .eq('is_approved', true)

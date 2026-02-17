@@ -38,8 +38,7 @@ const GalleryTab = () => {
             let query = supabase.from('portfolio').select(`
                 *,
                 profiles:worker_id (
-                    full_name,
-                    avatar_url
+                    full_name
                 )
             `);
 
