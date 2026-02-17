@@ -31,7 +31,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: false // Important for 'prompt' strategy
+        skipWaiting: false, // Important for 'prompt' strategy
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024 // Increase limit to 4MB for larger JS bundles
       },
       devOptions: {
         enabled: true
