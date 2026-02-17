@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Tag, ExternalLink, Calendar, User, Sparkles, X, Globe, ArrowRight } from 'lucide-react';
 import { PortfolioItem } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -182,11 +183,11 @@ const FullViewModal: React.FC<ModalProps> = ({ item, onClose }) => {
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Image Section */}
-                    <div className="lg:w-2/3 bg-black/20 flex items-center justify-center p-4 md:p-8 lg:p-12">
+                    <div className="lg:w-2/3 bg-black/40 flex items-center justify-center p-10 md:p-12 lg:p-16">
                         <img
                             src={item.image_url}
                             alt={item.title}
-                            className="max-w-full max-h-full w-auto h-auto object-contain rounded-2xl shadow-2xl"
+                            className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl md:rounded-2xl shadow-2xl"
                         />
                     </div>
 
