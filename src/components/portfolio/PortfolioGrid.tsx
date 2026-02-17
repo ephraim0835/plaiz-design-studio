@@ -182,11 +182,11 @@ const FullViewModal: React.FC<ModalProps> = ({ item, onClose }) => {
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Image Section */}
-                    <div className="lg:w-2/3 bg-black flex items-center justify-center overflow-hidden">
+                    <div className="lg:w-2/3 bg-black/20 flex items-center justify-center p-4 md:p-8 lg:p-12">
                         <img
                             src={item.image_url}
                             alt={item.title}
-                            className="w-full h-full object-contain max-h-[60vh] lg:max-h-none"
+                            className="max-w-full max-h-full w-auto h-auto object-contain rounded-2xl shadow-2xl"
                         />
                     </div>
 
