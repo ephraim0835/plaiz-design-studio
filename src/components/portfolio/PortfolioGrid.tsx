@@ -183,12 +183,14 @@ const FullViewModal: React.FC<ModalProps> = ({ item, onClose }) => {
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Image Section */}
-                    <div className="lg:w-2/3 bg-black/40 flex items-center justify-center p-10 md:p-12 lg:p-16">
-                        <img
-                            src={item.image_url}
-                            alt={item.title}
-                            className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl md:rounded-2xl shadow-2xl"
-                        />
+                    <div className="lg:w-2/3 bg-black/40 flex items-center justify-center p-8 md:p-12 lg:p-20 min-h-[400px]">
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <img
+                                src={item.image_url}
+                                alt={item.title}
+                                className="max-w-[90%] max-h-[90%] w-auto h-auto object-contain rounded-lg md:rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:scale-[1.02] transition-transform duration-500"
+                            />
+                        </div>
                     </div>
 
                     {/* Content Section */}
@@ -234,6 +236,15 @@ const FullViewModal: React.FC<ModalProps> = ({ item, onClose }) => {
                                     Visit Live Website <Globe size={20} />
                                 </a>
                             )}
+
+                            <a
+                                href={item.image_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-3"
+                            >
+                                <ExternalLink size={18} /> View Original Image
+                            </a>
 
                             <button
                                 onClick={onClose}
