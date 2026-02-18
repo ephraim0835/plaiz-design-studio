@@ -31,7 +31,7 @@ const STATUS_GROUPS: Record<string, ProjectStatus[]> = {
     in_progress: ['active', 'in_progress', 'work_started', 'waiting_for_client', 'pending_down_payment', 'awaiting_down_payment'],
     review: ['review_samples', 'ready_for_review', 'review'],
     completed: ['completed', 'approved', 'awaiting_payout', 'awaiting_final_payment'],
-    flagged: ['flagged', 'cancelled']
+    flagged: ['flagged', 'cancelled', 'NO_WORKER_AVAILABLE']
 };
 
 const AdminDashboard: React.FC = () => {
@@ -226,7 +226,9 @@ const AdminDashboard: React.FC = () => {
                                                     <div>
                                                         <h5 className="font-bold text-foreground text-sm mb-1">{project.title}</h5>
                                                         <p className="text-[9px] text-muted font-bold uppercase tracking-widest">
-                                                            {project.status === 'matching' ? 'Finding Expert' : project.status.replace(/_/g, ' ')}
+                                                            {project.status === 'matching' ? 'Expert Curating' :
+                                                                project.status === 'NO_WORKER_AVAILABLE' ? 'No Experts Available' :
+                                                                    project.status.replace(/_/g, ' ')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -343,8 +345,12 @@ const AdminDashboard: React.FC = () => {
                                                             <span className="px-2.5 py-1 bg-background rounded-lg text-[10px] font-bold text-muted border border-border">{stats.active_projects || 0}</span>
                                                         </td>
                                                         <td className="p-6">
-                                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest ${stats.is_probation ? 'bg-plaiz-coral/10 text-plaiz-coral border border-plaiz-coral/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
-                                                                {stats.is_probation ? 'Probation' : 'Verified'}
+                                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest ${worker.verification_status === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                                                    worker.verification_status === 'REJECTED' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                                                                        worker.verification_status === 'SUSPENDED' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                                                            'bg-plaiz-blue/10 text-plaiz-blue border border-plaiz-blue/20'
+                                                                }`}>
+                                                                {worker.verification_status || 'Pending'}
                                                             </span>
                                                         </td>
                                                     </tr>

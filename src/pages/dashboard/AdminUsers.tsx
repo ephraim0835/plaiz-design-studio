@@ -152,6 +152,28 @@ const AdminUsers: React.FC = () => {
         }
     };
 
+    const handleUpdateVerification = async (userId: string, newStatus: string) => {
+        if (!confirm(`Set verification status to ${newStatus}?`)) return;
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({ verification_status: newStatus })
+            .eq('id', userId);
+
+        if (error) {
+            alert('Error updating verification: ' + error.message);
+        } else {
+            // Also log the change (Phase 6 requirement)
+            await supabase.from('verification_audit_logs').insert({
+                worker_id: userId,
+                admin_id: (await supabase.auth.getUser()).data.user?.id,
+                previous_status: profiles.find(p => p.id === userId)?.verification_status,
+                new_status: newStatus
+            });
+            fetchProfiles();
+        }
+    };
+
     const handleDeleteUser = async () => {
         if (!deletingUser || !deletionReason.trim()) return;
 
@@ -338,7 +360,7 @@ const AdminUsers: React.FC = () => {
                                     <tr className="border-b border-[var(--border-color)]">
                                         <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">User</th>
                                         <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Role</th>
-                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Status</th>
+                                        <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Verification</th>
                                         <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Actions</th>
                                     </tr>
                                 </thead>
@@ -377,28 +399,53 @@ const AdminUsers: React.FC = () => {
                                                     </button>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)] ${p.is_active !== false ? 'bg-green-500' : 'bg-red-500 shadow-red-500/50'}`} />
-                                                        <span className="text-xs font-bold text-white/40 uppercase tracking-widest">
-                                                            {p.is_active !== false ? 'Active' : 'Inactive'}
+                                                    <div className="flex flex-col gap-2">
+                                                        <span className={`w-fit px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${p.verification_status === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                                                p.verification_status === 'REJECTED' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                                                                    p.verification_status === 'SUSPENDED' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                                                        'bg-plaiz-blue/10 text-plaiz-blue border border-plaiz-blue/20'
+                                                            }`}>
+                                                            {p.verification_status || 'PENDING'}
                                                         </span>
+                                                        <div className="flex items-center gap-1.5 opacity-40">
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${p.is_active !== false ? 'bg-green-500' : 'bg-red-500'}`} />
+                                                            <span className="text-[8px] font-bold uppercase tracking-tight">{p.is_active !== false ? 'Active' : 'Deactivated'}</span>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {/* Verification Quick Actions */}
+                                                        {p.role !== 'admin' && p.role !== 'client' && (
+                                                            <>
+                                                                {p.verification_status === 'PENDING' && (
+                                                                    <>
+                                                                        <button onClick={() => handleUpdateVerification(p.id, 'VERIFIED')} className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all" title="Verify Worker"><CheckCircle size={16} /></button>
+                                                                        <button onClick={() => handleUpdateVerification(p.id, 'REJECTED')} className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all" title="Reject Application"><XCircle size={16} /></button>
+                                                                    </>
+                                                                )}
+                                                                {p.verification_status === 'VERIFIED' && (
+                                                                    <button onClick={() => handleUpdateVerification(p.id, 'SUSPENDED')} className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all" title="Suspend Worker"><Shield size={16} className="text-amber-500" /></button>
+                                                                )}
+                                                                {p.verification_status === 'SUSPENDED' && (
+                                                                    <button onClick={() => handleUpdateVerification(p.id, 'VERIFIED')} className="p-2.5 rounded-xl bg-plaiz-blue/10 text-plaiz-blue hover:bg-plaiz-blue hover:text-white transition-all" title="Reinstate Worker"><CheckCircle size={16} /></button>
+                                                                )}
+                                                            </>
+                                                        )}
+
                                                         <button
                                                             onClick={() => { setEditingUser(p); setNewRole(p.role); }}
                                                             className="p-2.5 rounded-xl bg-white/5 text-white/40 hover:text-white transition-colors"
                                                             title="Edit Role"
                                                         >
-                                                            <Shield size={16} />
+                                                            <MoreHorizontal size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeactivate(p.id, p.is_active !== false)}
                                                             className={`p-2.5 rounded-xl bg-white/5 transition-colors ${p.is_active !== false ? 'text-white/40 hover:text-yellow-500' : 'text-green-500/40 hover:text-green-500'}`}
                                                             title={p.is_active !== false ? "Deactivate User" : "Activate User"}
                                                         >
-                                                            {p.is_active !== false ? <XCircle size={16} /> : <CheckCircle size={16} />}
+                                                            {p.is_active !== false ? <XCircle size={16} className="opacity-40" /> : <CheckCircle size={16} className="text-green-500" />}
                                                         </button>
                                                         <button
                                                             onClick={() => setDeletingUser({ id: p.id, name: p.full_name || '', email: p.email || '' })}

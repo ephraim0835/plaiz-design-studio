@@ -14,13 +14,15 @@ serve(async (req) => {
 
         // 1. Project Analysis using Gemini 1.5 Flash
         const analysisPrompt = `Analyze this project brief for Plaiz Design Studio. 
-        Identify the primary required skill.
-        Choose EXACTLY ONE from: graphic_design, web_design, printing.
+        Classify the project into EXACTLY ONE role from these categories ONLY:
+        - Graphic Designer (Logos, Flyers, Branding, Social Media)
+        - Web Designer (Websites, Dashboards, UI/UX)
+        - Print Specialist (Banners, Business Cards, Packaging, Clothing Prints)
         
         Title: ${title}
         Description: ${description}
         
-        Return ONLY the category ID name.`
+        Return ONLY the role name as plain text (e.g. Graphic Designer).`
 
         const analysisResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST',
@@ -35,22 +37,26 @@ serve(async (req) => {
         })
 
         const analysisData = await analysisResponse.json()
-        const detectedSkill = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.toLowerCase()?.trim() || 'graphic_design'
+        const detectedRole = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Graphic Designer'
 
-        // 2. Update Project Type & Trigger Worker Matching RPC
-        await supabase.from('projects').update({ project_type: detectedSkill }).eq('id', projectId)
+        // Clean up role (sometimes Gemini adds formatting)
+        const validRoles = ['Graphic Designer', 'Web Designer', 'Print Specialist']
+        const role = validRoles.find(r => detectedRole.includes(r)) || 'Graphic Designer'
 
-        const { data: workerId, error: matchError } = await supabase.rpc('match_worker_to_project', {
-            p_skill: detectedSkill,
+        // 2. Update Project Type & Trigger Worker Matching RPC (V2)
+        await supabase.from('projects').update({ project_type: role, status: 'matching' }).eq('id', projectId)
+
+        const { data: workerId, error: matchError } = await supabase.rpc('match_worker_v2', {
+            p_role: role,
             p_project_id: projectId
         })
 
         if (matchError) throw matchError
 
         // 3. Log Orchestration Success
-        console.log(`Successfully orchestrated project ${projectId}. Detected Skill: ${detectedSkill}. Assigned Worker: ${workerId}`)
+        console.log(`V2 Orchestration SUCCESS: Project ${projectId}. Role: ${role}. Assigned Worker: ${workerId || 'NONE_AVAILABLE'}`)
 
-        return new Response(JSON.stringify({ success: true, skill: detectedSkill, workerId }), {
+        return new Response(JSON.stringify({ success: true, role, workerId }), {
             headers: { "Content-Type": "application/json" },
         })
 

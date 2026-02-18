@@ -19,7 +19,7 @@ export interface Profile {
         messages: boolean;
         marketing: boolean;
     };
-    is_verified?: boolean;
+    verification_status?: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED';
     minimum_price?: number | null;
 }
 
@@ -43,6 +43,7 @@ export type ProjectStatus =
     | 'pending_down_payment'
     | 'chat_negotiation'
     | 'stuck_in_negotiation'
+    | 'NO_WORKER_AVAILABLE'
     | 'completed'
     | 'cancelled'
     | 'flagged';
@@ -92,6 +93,7 @@ export interface Project {
     project_type: 'graphic_design' | 'web_design' | 'printing';
     assignment_method?: 'ai' | 'manual' | 'legacy';
     assignment_metadata?: any;
+    assignment_deadline?: string;
     created_at: string;
     updated_at: string;
     worker_stats?: WorkerStats;

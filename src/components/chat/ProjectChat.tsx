@@ -109,6 +109,79 @@ const MatchingOverlay = () => (
     </div>
 );
 
+const AcceptanceOverlay: React.FC<{
+    project: any,
+    onAccept: () => void,
+    onDecline: () => void,
+    deadline?: string
+}> = ({ project, onAccept, onDecline, deadline }) => {
+    const [timeLeft, setTimeLeft] = useState('');
+
+    useEffect(() => {
+        if (!deadline) return;
+        const interval = setInterval(() => {
+            const diff = new Date(deadline).getTime() - new Date().getTime();
+            if (diff <= 0) {
+                setTimeLeft('EXPIRED');
+                clearInterval(interval);
+            } else {
+                const mins = Math.floor(diff / 60000);
+                const secs = Math.floor((diff % 60000) / 1000);
+                setTimeLeft(`${mins}:${secs < 10 ? '0' : ''}${secs}`);
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [deadline]);
+
+    return (
+        <div className="absolute inset-0 z-[100] bg-background/95 backdrop-blur-3xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="max-w-md w-full space-y-8">
+                <div className="space-y-2">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-plaiz-blue/10 text-plaiz-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                        <Clock size={12} /> Assignment Pending
+                    </span>
+                    <h3 className="text-3xl font-black text-foreground tracking-tight">Accept this Mission?</h3>
+                    <p className="text-muted-foreground text-sm font-medium">You have been selected as the best expert for this project.</p>
+                </div>
+
+                <div className="bg-surface/50 border border-border rounded-3xl p-6 text-left space-y-4">
+                    <div>
+                        <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest block mb-1">Project Brief</span>
+                        <h4 className="font-bold text-lg text-foreground">{project?.title}</h4>
+                        <p className="text-sm text-muted-foreground line-clamp-3 mt-2">{project?.description}</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-border">
+                        <div className="flex justify-between items-center bg-plaiz-blue/5 p-4 rounded-2xl">
+                            <span className="text-xs font-bold text-plaiz-blue">TIME REMAINING</span>
+                            <span className="text-2xl font-black text-plaiz-blue font-mono">{timeLeft}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                    <button
+                        onClick={onAccept}
+                        className="w-full py-4 bg-plaiz-blue text-white font-black rounded-2xl shadow-xl shadow-plaiz-blue/20 hover:scale-[1.02] active:scale-95 transition-all uppercase text-sm tracking-widest"
+                    >
+                        ACCEPT WORK ⚡
+                    </button>
+                    <button
+                        onClick={onDecline}
+                        className="w-full py-4 text-rose-500 font-bold hover:bg-rose-500/5 rounded-2xl transition-all uppercase text-[11px] tracking-widest"
+                    >
+                        I CANNOT DO THIS
+                    </button>
+                </div>
+
+                <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-tight">
+                    Acceptance opens the chat and locks the project to you.
+                </p>
+            </div>
+        </div>
+    );
+};
+
 const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) => {
     const { user, profile } = useAuth();
     const currentUserRole = profile?.role === 'client' ? 'client' : (profile?.role === 'admin' ? 'admin' : 'worker');
@@ -138,6 +211,8 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const isMatching = project?.status === 'matching';
+    const isAssignedPending = project?.status === 'assigned' && currentUserRole === 'worker';
+    const isChatLocked = project?.status === 'assigned' || project?.status === 'matching';
 
     useEffect(() => {
         const fetchProjectData = async () => {
@@ -399,6 +474,35 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
         }
     };
 
+    const handleDeclineWork = async () => {
+        const reason = prompt("Why can't you take this project? (e.g. Too busy, Deadline too short, Not skilled for this)");
+        if (reason === null) return;
+
+        try {
+            await supabase.from('projects').update({
+                status: 'matching',
+                worker_id: null,
+                rejection_reason: reason || 'Worker declined'
+            }).eq('id', projectId);
+
+            await fetch('/api/reassign-project', { method: 'POST', body: JSON.stringify({ projectId }) }).catch(() => { });
+            alert("Project declined. Finding next expert...");
+        } catch (err: any) {
+            alert("Error declining: " + err.message);
+        }
+    };
+
+    const handleAcceptWork = async () => {
+        try {
+            const { error } = await supabase.from('projects').update({
+                status: 'waiting_for_client'
+            }).eq('id', projectId);
+            if (error) throw error;
+        } catch (err: any) {
+            alert("Error accepting: " + err.message);
+        }
+    };
+
     const formatTime = (dateStr: string) => {
         const date = new Date(dateStr);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -408,6 +512,14 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
         <div className={`flex flex-col h-[100svh] lg:h-full overflow-hidden relative transition-all duration-500 chat-stage-bg lg:rounded-2xl z-20`}>
 
             {isMatching && <MatchingOverlay />}
+            {isAssignedPending && (
+                <AcceptanceOverlay
+                    project={project}
+                    onAccept={handleAcceptWork}
+                    onDecline={handleDeclineWork}
+                    deadline={project.assignment_deadline}
+                />
+            )}
 
             <div className="flex h-16 lg:h-20 border-b border-border px-4 lg:px-6 items-center justify-between shrink-0 z-[40] 
                 bg-card/95 backdrop-blur-xl">
@@ -719,9 +831,9 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                                     ref={textAreaRef}
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder={isUploading ? "Uploading file..." : "Type a message"}
+                                    placeholder={isChatLocked ? "Accept project to unlock chat..." : isUploading ? "Uploading file..." : "Type a message"}
                                     rows={1}
-                                    disabled={isUploading}
+                                    disabled={isUploading || isChatLocked}
                                     className="flex-1 bg-transparent border-none focus:ring-0 text-foreground text-[16px] lg:text-[17px] font-medium py-3 lg:py-5 px-0 placeholder:text-muted-foreground/30 resize-none overflow-y-auto min-h-[32px] lg:min-h-[64px] max-h-[250px] leading-relaxed flex items-center"
                                     onInput={(e) => {
                                         const target = e.target as HTMLTextAreaElement;
@@ -740,7 +852,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                             {newMessage.trim() || attachments.length > 0 ? (
                                 <button
                                     onClick={handleSend}
-                                    disabled={isSending || isUploading}
+                                    disabled={isSending || isUploading || isChatLocked}
                                     className="w-[52px] h-[52px] lg:w-[64px] lg:h-[64px] bg-plaiz-blue text-white rounded-[18px] lg:rounded-[24px] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl shadow-plaiz-blue/30 disabled:opacity-30 disabled:scale-100 shrink-0"
                                 >
                                     {isUploading ? (
@@ -762,7 +874,8 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                                 <button
                                     type="button"
                                     onClick={() => setIsRecording(true)}
-                                    className="w-[52px] h-[52px] lg:w-[64px] lg:h-[64px] rounded-[18px] lg:rounded-[24px] bg-accent/5 border border-border/50 text-muted-foreground flex items-center justify-center transition-all shrink-0 active:scale-90 hover:scale-105 hover:bg-plaiz-blue hover:text-white group"
+                                    disabled={isChatLocked}
+                                    className="w-[52px] h-[52px] lg:w-[64px] lg:h-[64px] rounded-[18px] lg:rounded-[24px] bg-accent/5 border border-border/50 text-muted-foreground flex items-center justify-center transition-all shrink-0 active:scale-90 hover:scale-105 hover:bg-plaiz-blue hover:text-white group disabled:opacity-20"
                                     title="Voice Note"
                                 >
                                     <Mic size={24} className="group-hover:scale-110 transition-transform" />
