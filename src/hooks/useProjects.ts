@@ -154,7 +154,7 @@ export const useProjects = (filter: ProjectFilter = {}, userRole?: string, userI
                     {
                         ...projectData,
                         created_at: new Date().toISOString(),
-                        status: 'queued' // Default status changed from 'pending'
+                        status: 'matching' // Default status for AI-first orchestration
                     }
                 ])
                 .select()
@@ -163,7 +163,7 @@ export const useProjects = (filter: ProjectFilter = {}, userRole?: string, userI
             if (insertError) throw insertError
 
             // 2. Attempt Auto-Assignment (New Format: AI Fair Rotation)
-            if (data && data.status === 'queued' && !data.worker_id) {
+            if (data && data.status === 'matching' && !data.worker_id) {
                 try {
                     const projectBudget = data.assignment_metadata?.budget_ngn || 0;
 
@@ -184,7 +184,7 @@ export const useProjects = (filter: ProjectFilter = {}, userRole?: string, userI
                         // Fallback to queued if database error occurs
                         await supabase
                             .from('projects')
-                            .update({ status: 'queued' })
+                            .update({ status: 'matching' })
                             .eq('id', data.id);
                     }
                 } catch (assignErr) {

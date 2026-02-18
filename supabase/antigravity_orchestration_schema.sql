@@ -37,13 +37,14 @@ DECLARE
     v_platform_share NUMERIC;
 BEGIN
     IF p_type = 'printing' THEN
-        -- Platform takes 10% of worker's profit
+        -- Platform takes 10% of worker's profit (p_profit = total - material cost)
+        -- p_profit is passed from the worker's quote/proposal
         v_platform_share := COALESCE(p_profit, 0) * 0.10;
         v_worker_share := p_total - v_platform_share;
     ELSE
-        -- Standard 70/30 Digital Split
-        v_platform_share := p_total * 0.30;
-        v_worker_share := p_total * 0.70;
+        -- Standard 80/20 Digital Split (20% of total)
+        v_platform_share := p_total * 0.20;
+        v_worker_share := p_total * 0.80;
     END IF;
     
     RETURN jsonb_build_object(

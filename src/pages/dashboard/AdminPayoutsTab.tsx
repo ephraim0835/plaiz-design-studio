@@ -33,7 +33,7 @@ const AdminPayoutsTab: React.FC = () => {
                 .from('payouts')
                 .select(`
                     *,
-                    projects (title),
+                    projects (title, skill),
                     profiles:worker_id (full_name, avatar_url),
                     bank_accounts:worker_id (bank_name, account_number, account_name)
                 `)
@@ -156,19 +156,21 @@ const AdminPayoutsTab: React.FC = () => {
                                     {/* Financials & Bank */}
                                     <div className="flex flex-wrap gap-8 items-center bg-background/50 p-6 rounded-2xl border border-border/50">
                                         <div>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted block mb-1">Total Amount</span>
-                                            <span className="text-xl font-black text-foreground">₦{payout.amount.toLocaleString()}</span>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted block mb-1">Total Project Value</span>
+                                            <span className="text-xl font-black text-foreground">₦{(payout.amount + payout.platform_fee).toLocaleString()}</span>
                                         </div>
                                         <div className="h-8 w-px bg-border hidden sm:block" />
                                         <div>
                                             <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500 block mb-1">Worker Share</span>
-                                            <span className="text-xl font-black text-emerald-500">₦{(payout.amount * (payout.projects?.skill === 'printing' ? 0.90 : 0.70)).toLocaleString()}</span>
-                                            <span className="text-[10px] text-muted ml-1 font-bold">{payout.projects?.skill === 'printing' ? '(90% Profit)' : '(70%)'}</span>
+                                            <span className="text-xl font-black text-emerald-500">₦{payout.amount.toLocaleString()}</span>
+                                            <span className="text-[10px] text-muted ml-1 font-bold">
+                                                {payout.projects?.skill === 'printing' ? ' (Net Profit)' : ' (70%)'}
+                                            </span>
                                         </div>
                                         <div className="h-8 w-px bg-border hidden sm:block" />
                                         <div>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-plaiz-blue block mb-1">Platform (30%)</span>
-                                            <span className="text-xl font-black text-plaiz-blue">₦{(payout.amount * (payout.projects?.skill === 'printing' ? 0.10 : 0.30)).toLocaleString()}</span>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-plaiz-blue block mb-1">Platform Share</span>
+                                            <span className="text-xl font-black text-plaiz-blue">₦{payout.platform_fee.toLocaleString()}</span>
                                         </div>
                                         <div className="h-8 w-px bg-border hidden sm:block" />
                                         {bank ? (

@@ -11,6 +11,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         pending: 'bg-background text-muted border-border',
         assigned: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
         queued: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+        matching: 'bg-plaiz-blue/10 text-plaiz-blue border-plaiz-blue/20',
         chat_negotiation: 'bg-background text-muted border-border',
         pending_agreement: 'bg-yellow-500/10 text-amber-600 dark:text-yellow-400 border-yellow-500/20',
         pending_down_payment: 'bg-plaiz-coral text-white border-plaiz-coral shadow-[0_0_15px_rgba(255,107,107,0.4)] animate-pulse',
@@ -47,8 +48,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 )}
 
                 <div className="flex justify-between items-start mb-4">
-                    <span className={`px-2.5 py-1 rounded-md text-[9px] lg:text-[10px] font-black uppercase tracking-widest border ${statusColors[project.status] || statusColors.pending}`}>
-                        {project.status.toLowerCase() === 'queued' ? 'Curating Expert Team' : project.status.replace(/_/g, ' ')}
+                    <span className={`px-2.5 py-1 rounded-md text-[9px] lg:text-[10px] font-black uppercase tracking-widest border ${project.status === 'matching' ? 'bg-plaiz-blue/10 text-plaiz-blue border-plaiz-blue/20' : statusColors[project.status] || statusColors.pending}`}>
+                        {project.status === 'matching' ? 'Finding Expert' : project.status.replace(/_/g, ' ')}
                     </span>
                     <span className="text-[9px] lg:text-[10px] text-muted uppercase tracking-widest font-black">
                         {formatDate(project.created_at)}

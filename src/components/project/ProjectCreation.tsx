@@ -18,7 +18,6 @@ const ProjectCreation: React.FC = () => {
     const { createProject } = useProjects();
     const navigate = useNavigate();
 
-    const [selectedService, setSelectedService] = useState('graphic_design');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -45,7 +44,7 @@ const ProjectCreation: React.FC = () => {
             const result = await createProject({
                 title,
                 description,
-                project_type: selectedService as any,
+                project_type: 'pending' as any, // Rely on AI for detection
                 client_id: user?.id,
                 assignment_metadata: {
                     budget_ngn: 0, // Set to 0 since it will be negotiated later

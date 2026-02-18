@@ -43,6 +43,13 @@ const ClientDashboard: React.FC = () => {
     }, [location.state]);
 
     const handleProjectClick = async (project: any) => {
+        if (project.status === 'matching') {
+            // Do not open chat for unassigned projects
+            setSelectedProjectId(null);
+            // Optionally could show a toast or local state for "Finding your expert..."
+            return;
+        }
+
         if (project.status === 'pending_down_payment' || project.status === 'awaiting_final_payment') {
             try {
                 const { data: agreement } = await supabase
@@ -156,7 +163,7 @@ const ClientDashboard: React.FC = () => {
                                                 <div>
                                                     <h5 className="font-bold text-foreground text-sm mb-1">{project.title}</h5>
                                                     <p className="text-[9px] text-muted font-bold uppercase tracking-widest">
-                                                        {project.status.toLowerCase() === 'queued' ? 'Curating Expert Team' : project.status.replace(/_/g, ' ')}
+                                                        {project.status === 'matching' ? 'Finding Expert' : project.status.replace(/_/g, ' ')}
                                                     </p>
                                                 </div>
                                             </div>

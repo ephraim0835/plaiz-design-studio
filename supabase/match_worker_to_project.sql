@@ -15,8 +15,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     v_worker_id UUID;
-    v_normalized_skill TEXT;
-    v_role_alias TEXT;
+    v_skills_array TEXT[];
     v_effective_count NUMERIC;
     v_client_id UUID;
     v_project_title TEXT;
@@ -24,66 +23,73 @@ BEGIN
     -- STEP 1: Fetch Project Details
     SELECT client_id, title INTO v_client_id, v_project_title FROM projects WHERE id = p_project_id;
 
-    -- STEP 2: Normalize skill names
-    v_normalized_skill := CASE 
-        WHEN p_skill IN ('graphic_design', 'logo_design', 'branding', 'graphics') THEN 'graphics'
-        WHEN p_skill IN ('web_design', 'website', 'web_development', 'web') THEN 'web'
-        WHEN p_skill IN ('printing', 'print', 'merchandise', 'printing_services') THEN 'printing'
-        ELSE p_skill
-    END;
+    -- STEP 2: Logic simplified to single skill match
 
-    -- STEP 3: Map to Profile Roles (Legacy support)
-    v_role_alias := CASE 
-        WHEN v_normalized_skill = 'graphics' THEN 'graphic_designer'
-        WHEN v_normalized_skill = 'web' THEN 'web_designer'
-        WHEN v_normalized_skill = 'printing' THEN 'print_specialist'
-        ELSE v_normalized_skill
-    END;
-
-    -- STEP 4: Find best worker using Fair Rotation Logic
-    -- Baseline for New Workers = 1 (simulated assignment count)
-    SELECT p.id, (COALESCE(wr.assignment_count, 0) + CASE WHEN wr.assignment_count IS NULL THEN 1 ELSE 0 END) 
-    INTO v_worker_id, v_effective_count
-    FROM profiles p
-    LEFT JOIN worker_rotation wr ON wr.worker_id = p.id AND wr.skill = v_normalized_skill
-    LEFT JOIN worker_stats ws ON ws.worker_id = p.id
-    LEFT JOIN bank_accounts ba ON ba.worker_id = p.id
-    WHERE 
-        -- Skill/Role Match
-        (p.skill = v_normalized_skill OR p.role = v_role_alias OR p.role = p_skill)
-        AND p.role NOT IN ('client', 'admin')
-        
-        -- Eligibility Guards
-        AND p.is_active = true
-        AND COALESCE(p.is_available, true) = true
-        AND (ba.is_verified = true OR EXISTS (SELECT 1 FROM profiles WHERE id = p.id AND role = 'admin'))
-        AND (p_budget = 0 OR p_budget IS NULL OR COALESCE(p.minimum_price, 0) <= p_budget)
-        AND COALESCE(ws.is_probation, false) = false
-        AND COALESCE(ws.active_projects, 0) < COALESCE(ws.max_projects_limit, 5)
-    ORDER BY 
-        (COALESCE(wr.assignment_count, 0) + CASE WHEN wr.assignment_count IS NULL THEN 1 ELSE 0 END) ASC,
-        COALESCE(wr.last_assigned_at, '1970-01-01'::timestamptz) ASC,
-        RANDOM()
+    -- STEP 3: Identify Pool and Score Candidates
+    WITH worker_pool AS (
+        SELECT 
+            p.id,
+            p.full_name,
+            -- Skill Match (40%)
+            (CASE 
+                WHEN p.skill = p_skill OR p.role = p_skill THEN 1.0
+                WHEN p.learned_skills ? p_skill THEN 0.8  
+                ELSE 0.0 
+            END) * 0.40 AS skill_score,
+            -- Rating (25%)
+            (COALESCE(ws.average_rating, 4.5) / 5.0) * 0.25 AS rating_score,
+            -- Experience (10%)
+            (LEAST(COALESCE(ws.completed_projects, 0) / 20.0, 1.0)) * 0.10 AS exp_score,
+            -- Workload (15%)
+            (1.0 - (COALESCE(ws.active_projects, 0)::NUMERIC / COALESCE(ws.max_projects_limit, 5)::NUMERIC)) * 0.15 AS workload_score,
+            -- Rotation (Idle-Longest-First) (10%)
+            (EXTRACT(EPOCH FROM (NOW() - COALESCE(wr.last_assigned_at, '2000-01-01'::TIMESTAMPTZ))) / 86400.0) * 0.10 AS rotation_score
+        FROM profiles p
+        LEFT JOIN worker_stats ws ON ws.worker_id = p.id
+        LEFT JOIN bank_accounts ba ON ba.worker_id = p.id
+        LEFT JOIN worker_rotation wr ON wr.worker_id = p.id AND wr.skill = p_skill
+        WHERE 
+            p.role NOT IN ('client', 'admin')
+            AND p.is_active = true
+            AND COALESCE(p.is_available, true) = true
+            AND (ba.is_verified = true OR EXISTS (SELECT 1 FROM profiles WHERE id = p.id AND role = 'admin'))
+            AND (p_budget = 0 OR p_budget IS NULL OR COALESCE(p.minimum_price, 0) <= p_budget)
+            AND COALESCE(ws.is_probation, false) = false
+            AND COALESCE(ws.active_projects, 0) < COALESCE(ws.max_projects_limit, 5)
+            AND (p.skill = p_skill OR p.role = p_skill OR p.learned_skills ? p_skill)
+    ),
+    scored_workers AS (
+        SELECT 
+            id,
+            (skill_score + rating_score + exp_score + workload_score + rotation_score) as total_score
+        FROM worker_pool
+        ORDER BY total_score DESC
+        LIMIT 3
+    )
+    SELECT id INTO v_worker_id
+    FROM scored_workers
+    ORDER BY RANDOM()
     LIMIT 1;
     
-    -- STEP 5: Execution & Engagement
+    -- STEP 4: Execution & Engagement
     IF v_worker_id IS NOT NULL THEN
-        -- 5.1 Assign to project
+        -- 4.1 Assign to project
         UPDATE projects 
         SET 
             worker_id = v_worker_id,
             status = 'assigned'
         WHERE id = p_project_id;
 
-        -- 5.2 Update rotation tracking
+        -- 4.2 Update Rotation Tracking
+        -- We still use worker_rotation for historical tracking even if logic changed
         INSERT INTO worker_rotation (skill, worker_id, last_assigned_at, assignment_count)
-        VALUES (v_normalized_skill, v_worker_id, NOW(), 1)
+        VALUES (p_skill, v_worker_id, NOW(), 1)
         ON CONFLICT (worker_id, skill) 
         DO UPDATE SET
             last_assigned_at = NOW(),
             assignment_count = worker_rotation.assignment_count + 1;
 
-        -- 5.3 Trigger Engagement (Initial Message)
+        -- 4.3 Trigger Engagement (Initial Message)
         INSERT INTO messages (project_id, sender_id, content)
         VALUES (
             p_project_id,
@@ -91,16 +97,15 @@ BEGIN
             'Hello! I''ve been assigned to your project "' || v_project_title || '". I''m ready to get started—let''s discuss the details!'
         );
 
-        -- 5.4 Auditor Log
-        INSERT INTO assignment_logs (project_id, worker_id, effective_count, match_reason)
+        -- 4.4 Auditor Log
+        INSERT INTO assignment_logs (project_id, worker_id, match_reason)
         VALUES (
             p_project_id,
             v_worker_id,
-            v_effective_count,
-            'Fair rotation selection (Effective Count: ' || v_effective_count || ')'
+            'AntiGravity Definitive Match (Score-Based)'
         );
 
-        -- 5.5 Notify worker
+        -- 4.5 Notify worker
         INSERT INTO notifications (user_id, title, message, type, project_id)
         VALUES (
             v_worker_id,
@@ -109,6 +114,9 @@ BEGIN
             'project_assigned',
             p_project_id
         ) ON CONFLICT DO NOTHING;
+    ELSE
+        -- Fallback: If no match, set to matching/queued
+        UPDATE projects SET status = 'matching' WHERE id = p_project_id;
     END IF;
     
     RETURN v_worker_id;

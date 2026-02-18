@@ -27,7 +27,7 @@ import { Link } from 'react-router-dom';
 import { ProjectStatus } from '../../types';
 
 const STATUS_GROUPS: Record<string, ProjectStatus[]> = {
-    pending: ['pending', 'queued', 'assigned', 'chat_negotiation', 'pending_agreement'],
+    pending: ['pending', 'queued', 'matching', 'assigned', 'chat_negotiation', 'pending_agreement', 'stuck_in_negotiation'],
     in_progress: ['active', 'in_progress', 'work_started', 'waiting_for_client', 'pending_down_payment', 'awaiting_down_payment'],
     review: ['review_samples', 'ready_for_review', 'review'],
     completed: ['completed', 'approved', 'awaiting_payout', 'awaiting_final_payment'],
@@ -226,7 +226,7 @@ const AdminDashboard: React.FC = () => {
                                                     <div>
                                                         <h5 className="font-bold text-foreground text-sm mb-1">{project.title}</h5>
                                                         <p className="text-[9px] text-muted font-bold uppercase tracking-widest">
-                                                            {project.status.toLowerCase() === 'queued' ? 'Curating Expert Team' : project.status.replace(/_/g, ' ')}
+                                                            {project.status === 'matching' ? 'Finding Expert' : project.status.replace(/_/g, ' ')}
                                                         </p>
                                                     </div>
                                                 </div>

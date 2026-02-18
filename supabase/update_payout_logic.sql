@@ -21,6 +21,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     v_project_id UUID;
+    v_worker_id UUID;
 BEGIN
     -- Check if admin
     IF NOT EXISTS (
@@ -36,10 +37,17 @@ BEGIN
         admin_paid_at = NOW(),
         payout_date = NOW()
     WHERE id = payout_id
-    RETURNING project_id INTO v_project_id;
+    RETURNING project_id, worker_id INTO v_project_id, v_worker_id;
 
-    -- Update project status if needed (optional, state management usually handled by the split logic)
-    -- But the plan says: "Status changes to: Worker Paid" (on the UI level)
+    -- Notify worker
+    INSERT INTO notifications (user_id, title, message, type, project_id)
+    VALUES (
+        v_worker_id,
+        'Payout Sent!',
+        'Admin has processed your payout for project. Check your bank account.',
+        'payout_sent',
+        v_project_id
+    );
     
     RETURN json_build_object('success', true, 'project_id', v_project_id);
 END;

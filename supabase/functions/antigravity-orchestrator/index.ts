@@ -13,24 +13,33 @@ serve(async (req) => {
         const { id: projectId, title, description } = record
 
         // 1. Project Analysis using Gemini 1.5 Flash
+        const analysisPrompt = `Analyze this project brief for Plaiz Design Studio. 
+        Identify the primary required skill.
+        Choose EXACTLY ONE from: graphic_design, web_design, printing.
+        
+        Title: ${title}
+        Description: ${description}
+        
+        Return ONLY the category ID name.`
+
         const analysisResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{
                     parts: [{
-                        text: `Analyze this project brief and return ONLY the most suitable skill category (graphics, web, or printing). 
-            Title: ${title}
-            Description: ${description}`
+                        text: analysisPrompt
                     }]
                 }]
             })
         })
 
         const analysisData = await analysisResponse.json()
-        const detectedSkill = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.toLowerCase()?.trim() || 'graphics'
+        const detectedSkill = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.toLowerCase()?.trim() || 'graphic_design'
 
-        // 2. Trigger Worker Matching RPC
+        // 2. Update Project Type & Trigger Worker Matching RPC
+        await supabase.from('projects').update({ project_type: detectedSkill }).eq('id', projectId)
+
         const { data: workerId, error: matchError } = await supabase.rpc('match_worker_to_project', {
             p_skill: detectedSkill,
             p_project_id: projectId

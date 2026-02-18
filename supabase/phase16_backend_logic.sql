@@ -58,10 +58,7 @@ BEGIN
             NOW()
         );
 
-        -- STEP 4: Log Payout for Backend Processing (20/80 Split)
-        -- Fetch agreement amount
-        SELECT amount INTO v_agreement FROM agreements WHERE project_id = NEW.id ORDER BY created_at DESC LIMIT 1;
-        
+        -- STEP 4: Log Payout for Backend Processing (Using Locked Shares)
         -- Fetch worker bank info
         SELECT * INTO v_worker_bank FROM bank_accounts WHERE worker_id = NEW.worker_id AND is_verified = true;
 
@@ -77,9 +74,9 @@ BEGIN
             ) VALUES (
                 NEW.id,
                 NEW.worker_id,
-                COALESCE(v_agreement.amount, 0),
-                COALESCE(v_agreement.amount, 0) * 0.20,
-                COALESCE(v_agreement.amount, 0) * 0.80,
+                COALESCE(NEW.total_price, 0),
+                COALESCE(NEW.payout_platform_share, 0),
+                COALESCE(NEW.payout_worker_share, 0),
                 jsonb_build_object(
                     'bank_name', v_worker_bank.bank_name,
                     'account_number', v_worker_bank.account_number,

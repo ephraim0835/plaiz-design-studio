@@ -4,11 +4,14 @@ import { DollarSign, FileText, X, CheckCircle } from 'lucide-react';
 interface PricingProposalFormProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (amount: number, deliverables: string, timeline: string, notes: string) => Promise<void>;
+    onSubmit: (amount: number, deliverables: string, timeline: string, notes: string, cost?: number) => Promise<void>;
+    isPrinting?: boolean;
 }
 
-const PricingProposalForm: React.FC<PricingProposalFormProps> = ({ isOpen, onClose, onSubmit }) => {
+const PricingProposalForm: React.FC<PricingProposalFormProps> = ({ isOpen, onClose, onSubmit, isPrinting }) => {
     const [amount, setAmount] = useState('');
+    const [cost, setCost] = useState(''); // Only for printing
+    const [logisticsFee, setLogisticsFee] = useState(''); // Only for printing
     const [deliverables, setDeliverables] = useState('');
     const [notes, setNotes] = useState('');
     const [timeline, setTimeline] = useState('7 Days');
@@ -20,7 +23,13 @@ const PricingProposalForm: React.FC<PricingProposalFormProps> = ({ isOpen, onClo
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await onSubmit(Number(amount), deliverables, timeline, notes);
+            await onSubmit(
+                Number(amount),
+                deliverables,
+                timeline,
+                notes,
+                isPrinting ? Number(cost) : undefined
+            );
             onClose();
         } catch (error) {
             console.error('Proposal failed:', error);
@@ -67,6 +76,45 @@ const PricingProposalForm: React.FC<PricingProposalFormProps> = ({ isOpen, onClo
                                     />
                                 </div>
                             </div>
+
+                            {isPrinting && (
+                                <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-300">
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 ml-1">Material Cost (₦)</label>
+                                        <div className="relative group">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted font-bold group-focus-within:text-amber-500 transition-colors">₦</span>
+                                            <input
+                                                type="number"
+                                                required={isPrinting}
+                                                value={cost}
+                                                onChange={(e) => setCost(e.target.value)}
+                                                className="w-full bg-background/50 border border-amber-500/20 rounded-2xl py-4 pl-10 pr-4 text-foreground text-sm font-bold focus:border-amber-500 outline-none transition-all"
+                                                placeholder="e.g. 15000"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-plaiz-blue ml-1">Logistics Fee (₦)</label>
+                                        <div className="relative group">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted font-bold group-focus-within:text-plaiz-blue transition-colors">₦</span>
+                                            <input
+                                                type="number"
+                                                required={isPrinting}
+                                                value={logisticsFee}
+                                                onChange={(e) => setLogisticsFee(e.target.value)}
+                                                className="w-full bg-background/50 border border-plaiz-blue/20 rounded-2xl py-4 pl-10 pr-4 text-foreground text-sm font-bold focus:border-plaiz-blue outline-none transition-all"
+                                                placeholder="e.g. 2500"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {isPrinting && (
+                                <p className="text-[9px] text-muted-foreground mt-2 px-1">
+                                    Notice: The 10% Platform Fee is deducted from your **Profit** (Total - Material Cost - Logistics Fee).
+                                </p>
+                            )}
 
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted ml-1">Scope of Work (Deliverables)</label>

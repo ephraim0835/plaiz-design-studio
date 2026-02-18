@@ -79,11 +79,11 @@ BEGIN
             NOW()
         );
 
-        -- STEP 4: Log Payout for Backend Processing (20/80 Split)
-        SELECT amount INTO v_agreement FROM agreements WHERE project_id = NEW.id ORDER BY created_at DESC LIMIT 1;
+        -- STEP 4: Log Payout for Backend Processing (AntiGravity Locked Shares)
         SELECT * INTO v_worker_bank FROM bank_accounts WHERE worker_id = NEW.worker_id AND is_verified = true;
 
         IF v_worker_bank.id IS NOT NULL THEN
+            -- Insert into legacy logs
             INSERT INTO payout_logs (
                 project_id,
                 worker_id,
@@ -95,9 +95,9 @@ BEGIN
             ) VALUES (
                 NEW.id,
                 NEW.worker_id,
-                COALESCE(v_agreement.amount, 0),
-                COALESCE(v_agreement.amount, 0) * 0.20,
-                COALESCE(v_agreement.amount, 0) * 0.80,
+                NEW.total_price,
+                COALESCE(NEW.payout_platform_share, 0),
+                COALESCE(NEW.payout_worker_share, 0),
                 jsonb_build_object(
                     'bank_name', v_worker_bank.bank_name,
                     'account_number', v_worker_bank.account_number,
@@ -105,6 +105,29 @@ BEGIN
                 ),
                 'ready_for_transfer'
             );
+
+            -- Insert into main payouts table (used by Admin Dashboard)
+            INSERT INTO public.payouts (
+                project_id,
+                worker_id,
+                amount,
+                platform_fee,
+                status
+            ) VALUES (
+                NEW.id,
+                NEW.worker_id,
+                COALESCE(NEW.payout_worker_share, 0),
+                COALESCE(NEW.payout_platform_share, 0),
+                'awaiting_payment'
+            );
+        END IF;
+
+        -- STEP 5: Dynamic Learning (AntiGravity)
+        -- Add the completed project's skill to the worker's learned_skills
+        IF v_project_category IS NOT NULL THEN
+            UPDATE public.profiles
+            SET learned_skills = COALESCE(learned_skills, '{}'::jsonb) || jsonb_build_object(v_project_category, true)
+            WHERE id = NEW.worker_id;
         END IF;
 
     END IF;

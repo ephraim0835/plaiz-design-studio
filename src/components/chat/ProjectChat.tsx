@@ -53,6 +53,62 @@ const SafetyBanner = () => (
     </div>
 );
 
+const PreviewModeBanner = () => (
+    <div className="bg-plaiz-blue/10 border-y border-plaiz-blue/20 px-6 py-2 flex items-center gap-3 animate-in fade-in slide-in-from-top-1 duration-500">
+        <div className="w-6 h-6 rounded-full bg-plaiz-blue/20 flex items-center justify-center text-plaiz-blue shrink-0">
+            <FlaskConical size={14} />
+        </div>
+        <p className="text-[10px] md:text-[11px] font-black text-plaiz-blue leading-tight uppercase tracking-[0.1em]">
+            Preview Mode — Files unlock after final payment
+        </p>
+    </div>
+);
+
+const MatchingOverlay = () => (
+    <div className="absolute inset-0 z-[100] bg-background/90 backdrop-blur-2xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
+        {/* Technical Grid Background */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{ backgroundImage: `radial-gradient(circle at 2px 2px, var(--plaiz-blue) 1px, transparent 0)`, backgroundSize: '32px 32px' }}
+        />
+
+        <div className="relative mb-12">
+            {/* Pulsing Core */}
+            <div className="w-32 h-32 rounded-[48px] bg-plaiz-blue/10 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 rounded-[48px] border-2 border-plaiz-blue/30 animate-ping duration-1000" />
+                <div className="absolute inset-0 bg-gradient-to-br from-plaiz-blue/20 to-transparent" />
+                <Zap size={56} className="text-plaiz-blue animate-pulse relative z-10" />
+            </div>
+
+            {/* Spinning Technical Rings */}
+            <div className="absolute -inset-4 border border-plaiz-blue/5 rounded-full animate-spin duration-[10s]" />
+            <div className="absolute -inset-8 border border-plaiz-blue/5 rounded-full animate-reverse-spin duration-[15s]" />
+        </div>
+
+        <div className="max-w-md space-y-6">
+            <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-black text-plaiz-blue uppercase tracking-[0.5em] mb-2 animate-pulse">Neural Pathing Active</span>
+                <h3 className="text-4xl lg:text-5xl font-black text-foreground tracking-tighter leading-none">
+                    Curating Your <br />
+                    <span className="text-plaiz-blue underline decoration-plaiz-blue/20 underline-offset-8">Expert Team.</span>
+                </h3>
+            </div>
+
+            <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest max-w-sm leading-relaxed opacity-60">
+                AntiGravity is analyzing your brief and matching you with a top-rated creative professional.
+            </p>
+
+            <div className="flex flex-col items-center gap-4 pt-8">
+                <div className="flex gap-2">
+                    {[0, 1, 2].map((i) => (
+                        <div key={i} className="w-2 h-2 rounded-full bg-plaiz-blue animate-bounce shadow-[0_0_12px_rgba(47,128,237,0.4)]" style={{ animationDelay: `${i * 0.15}s` }} />
+                    ))}
+                </div>
+                <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.3em]">Processing Secure Match...</span>
+            </div>
+        </div>
+    </div>
+);
+
 const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) => {
     const { user, profile } = useAuth();
     const currentUserRole = profile?.role === 'client' ? 'client' : (profile?.role === 'admin' ? 'admin' : 'worker');
@@ -80,6 +136,8 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    const isMatching = project?.status === 'matching';
 
     useEffect(() => {
         const fetchProjectData = async () => {
@@ -208,15 +266,19 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
         }
     };
 
-    const handleProposalSubmit = async (amount: number, deliverables: string, timeline: string, notes: string) => {
+    const handleProposalSubmit = async (amount: number, deliverables: string, timeline: string, notes: string, cost?: number) => {
         try {
+            // Calculate profit for printing
+            const profitValue = cost !== undefined ? (amount - cost) : 0;
+
             const { error } = await supabase.rpc('submit_price_proposal', {
                 p_project_id: projectId,
                 p_worker_id: user.id,
                 p_amount: amount,
                 p_deliverables: deliverables,
                 p_timeline: timeline,
-                p_notes: notes
+                p_notes: notes,
+                p_profit: profitValue // New parameter for AntiGravity profit-based split
             });
             if (error) throw error;
             setShowProposalForm(false);
@@ -229,24 +291,26 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
     const handleAcceptProposal = async () => {
         try {
             if (!agreement) return;
-            const { error } = await supabase
-                .from('agreements')
-                .update({ status: 'accepted', client_agreed: true })
-                .eq('id', agreement.id);
 
-            if (error) throw error;
+            // Trigger RPC to lock it and update project status
+            const { error: rpcError } = await supabase.rpc('confirm_agreement', {
+                p_project_id: projectId,
+                p_agreement_id: agreement.id
+            });
 
-            // Update project status to awaiting_down_payment
-            await supabase
-                .from('projects')
-                .update({ status: 'awaiting_down_payment' })
-                .eq('id', projectId);
+            if (rpcError) throw rpcError;
 
-            // Send system message for payment
-            await sendMessage(`Proposal accepted. Please pay the 40% deposit of ₦${(agreement.amount * 0.4).toLocaleString()} to begin work.`, user.id, null, false, {
+            // Send system message for payment prompt (already handled by RPC message insertion? 
+            // Better to keep it explicit for the interactive payment request card)
+            const isPrinting = project?.skill === 'printing';
+            const paymentPrompt = isPrinting
+                ? `Proposal accepted. Please pay the full 100% amount of ₦${agreement.amount.toLocaleString()} to begin production.`
+                : `Proposal accepted. Please pay the 40% deposit of ₦${(agreement.amount * 0.4).toLocaleString()} to begin work.`;
+
+            await sendMessage(paymentPrompt, user.id, null, false, {
                 type: 'payment_request',
-                phase: 'deposit_40',
-                amount: agreement.amount * 0.4
+                phase: isPrinting ? 'full_100' : 'deposit_40',
+                amount: isPrinting ? agreement.amount : agreement.amount * 0.4
             });
 
         } catch (err: any) {
@@ -343,6 +407,8 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
     return (
         <div className={`flex flex-col h-[100svh] lg:h-full overflow-hidden relative transition-all duration-500 chat-stage-bg lg:rounded-2xl z-20`}>
 
+            {isMatching && <MatchingOverlay />}
+
             <div className="flex h-16 lg:h-20 border-b border-border px-4 lg:px-6 items-center justify-between shrink-0 z-[40] 
                 bg-card/95 backdrop-blur-xl">
                 <div className="flex items-center gap-3">
@@ -362,6 +428,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
             <div className="flex flex-col gap-0 lg:gap-0">
                 <ProjectStatusTracker status={project?.status} />
                 {currentUserRole === 'client' && <SafetyBanner />}
+                {project?.status !== 'completed' && <PreviewModeBanner />}
             </div>
 
             {/* Phase 18: Client Payment Overlay */}
@@ -782,6 +849,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                 isOpen={showProposalForm}
                 onClose={() => setShowProposalForm(false)}
                 onSubmit={handleProposalSubmit}
+                isPrinting={project?.skill === 'printing'}
             />
 
             {/* Image Preview Modal */}

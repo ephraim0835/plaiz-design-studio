@@ -20,43 +20,27 @@ serve(async (req) => {
         if (projectError) throw projectError
 
         if (action === 'accept_proposal') {
-            // Calculate Splits based on project type
-            const isPrinting = project.skill === 'printing'
-            const totalAmount = project.agreements.find(a => a.id === agreementId)?.amount || 0
-
-            const { data: splits } = await supabase.rpc('calculate_project_splits', {
-                p_total: totalAmount,
-                p_type: isPrinting ? 'printing' : 'digital'
+            const { data, error: rpcError } = await supabase.rpc('confirm_agreement', {
+                p_project_id: projectId,
+                p_agreement_id: agreementId
             })
 
-            // Lock financial shares and move to payment stage
-            await supabase.from('projects').update({
-                payout_worker_share: splits.worker_share,
-                payout_platform_share: splits.platform_share,
-                status: isPrinting ? 'awaiting_payment' : 'awaiting_deposit'
-            }).eq('id', projectId)
+            if (rpcError) throw rpcError
 
-            return new Response(JSON.stringify({ success: true, splits }), { headers: { "Content-Type": "application/json" } })
+            return new Response(JSON.stringify({ success: true, ...data }), { headers: { "Content-Type": "application/json" } })
         }
 
         if (action === 'trigger_reassignment') {
-            // Logic for triggering auto-reassignment
-            const newReassignmentCount = (project.reassignment_count || 0) + 1
+            const { data, error: rpcError } = await supabase.rpc('reject_price_proposal', {
+                p_project_id: projectId,
+                p_reason: reason || 'Reassignment requested by client'
+            })
 
-            // Update reassignment count and reset worker
-            await supabase.from('projects').update({
-                reassignment_count: newReassignmentCount,
-                worker_id: null,
-                status: 'queued'
-            }).eq('id', projectId)
+            if (rpcError) throw rpcError
 
-            // Penalty logic for excessive reassignments
-            if (newReassignmentCount >= 3) {
-                // Flag for Admin Mediation
-                console.warn(`Project ${projectId} flagged for manual mediation after ${newReassignmentCount} reassignments.`)
-            }
-
-            return new Response(JSON.stringify({ success: true, count: newReassignmentCount }), { headers: { "Content-Type": "application/json" } })
+            return new Response(JSON.stringify({ success: true, ...data }), {
+                headers: { "Content-Type": "application/json" }
+            })
         }
 
         return new Response(JSON.stringify({ error: 'Invalid action' }), { status: 400 })

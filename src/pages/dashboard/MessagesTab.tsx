@@ -59,8 +59,9 @@ const MessagesTab = () => {
                                 filteredProjects.map(project => (
                                     <button
                                         key={project.id}
-                                        onClick={() => setSearchParams({ project: project.id })}
+                                        onClick={() => project.status !== 'matching' && setSearchParams({ project: project.id })}
                                         className={`w-full p-5 rounded-[28px] transition-all text-left flex items-center gap-5 group relative overflow-hidden
+                                        ${project.status === 'matching' ? 'opacity-60 grayscale-[0.5] cursor-default' : ''}
                                         ${selectedProjectId === project.id
                                                 ? 'bg-plaiz-blue text-white shadow-2xl shadow-plaiz-blue/30'
                                                 : 'hover:bg-accent/5 text-foreground'}`}
@@ -78,7 +79,7 @@ const MessagesTab = () => {
                                                 </h5>
                                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full
                                                 ${selectedProjectId === project.id ? 'bg-white/20 text-white' : 'bg-accent/10 text-muted-foreground'}`}>
-                                                    {project.status.toLowerCase() === 'queued' ? 'QUEUED' : project.status.split('_')[0]}
+                                                    {project.status === 'matching' ? 'Matching' : project.status.split('_')[0]}
                                                 </span>
                                             </div>
                                             <p className={`text-[13px] truncate font-medium ${selectedProjectId === project.id ? 'text-white/70' : 'text-muted-foreground/50'}`}>

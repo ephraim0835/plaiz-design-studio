@@ -10,14 +10,13 @@ CREATE OR REPLACE FUNCTION public.trigger_ai_orchestration()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Perform an asynchronous HTTP POST to the Edge Function
-  -- Replace 'YOUR_PROJECT_REF' with your actual Supabase project reference if using local dev
-  -- In Supabase production, the 'supabase-functions' host is usually mapped automatically
+  -- Safer extraction of host and role using JSONB and COALESCE
   PERFORM
     net.http_post(
-      url := 'https://' || current_setting('request.headers')::json->>'host' || '/functions/v1/antigravity-orchestrator',
+      url := 'https://' || COALESCE(current_setting('request.headers', true)::jsonb->>'host', 'fxdzfxvoowioiisnuwbn.supabase.co') || '/functions/v1/antigravity-orchestrator',
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
-        'Authorization', 'Bearer ' || current_setting('request.jwt.claims')::json->>'role' -- Or use a fixed Service Role Key
+        'Authorization', 'Bearer ' || COALESCE(current_setting('request.jwt.claims', true)::jsonb->>'role', 'service_role')
       ),
       body := jsonb_build_object('record', row_to_json(NEW))
     );

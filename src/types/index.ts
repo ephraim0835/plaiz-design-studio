@@ -26,6 +26,7 @@ export interface Profile {
 export type ProjectStatus =
     'pending'
     | 'queued'
+    | 'matching'
     | 'assigned'
     | 'waiting_for_client'
     | 'awaiting_down_payment'
@@ -41,6 +42,7 @@ export type ProjectStatus =
     | 'pending_agreement'
     | 'pending_down_payment'
     | 'chat_negotiation'
+    | 'stuck_in_negotiation'
     | 'completed'
     | 'cancelled'
     | 'flagged';
