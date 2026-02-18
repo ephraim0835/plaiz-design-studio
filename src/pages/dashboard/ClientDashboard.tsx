@@ -234,7 +234,7 @@ const ClientDashboard: React.FC = () => {
                     onClose={() => setServiceModalOpen(false)}
                     onSelect={(service) => {
                         setServiceModalOpen(false);
-                        navigate(`/client/request?service=${service.id}`);
+                        navigate(`/client/request`, { state: { brief: service.description } });
                     }}
                 />
 

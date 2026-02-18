@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useProjects } from '../../hooks/useProjects';
 import { Zap, Palette, Monitor, Printer, Loader2, Send, ArrowLeft } from 'lucide-react';
@@ -23,6 +23,13 @@ const ProjectCreation: React.FC = () => {
     const [description, setDescription] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.brief) {
+            setDescription(location.state.brief);
+        }
+    }, [location.state]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,36 +78,32 @@ const ProjectCreation: React.FC = () => {
                 </button>
                 <div className="w-full max-w-4xl bg-surface border border-border rounded-[48px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-700">
                     <div className="grid grid-cols-1 lg:grid-cols-2">
-                        {/* Left side: Selections */}
-                        <div className="p-10 lg:p-16 border-b lg:border-r border-[var(--border-color)]">
+                        {/* Right side: Instructions */}
+                        <div className="p-10 lg:p-16 border-b lg:border-r border-[var(--border-color)] bg-plaiz-blue/5">
                             <div className="flex items-center gap-3 mb-12 text-plaiz-blue text-[10px] font-black uppercase tracking-[0.4em]">
                                 <Zap size={16} className="fill-plaiz-blue" />
-                                <span>Initialization</span>
+                                <span>AntiGravity AI</span>
                             </div>
                             <h1 className="text-4xl lg:text-5xl font-black text-foreground tracking-tighter mb-12 leading-[0.9]">
-                                Start your <br /> <span className="text-plaiz-blue">Creative Project.</span>
+                                Automated <br /> <span className="text-plaiz-blue">Orchestration.</span>
                             </h1>
 
-                            <div className="space-y-6">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted/30 ml-2">Select Service</label>
-                                <div className="grid grid-cols-1 gap-4">
-                                    {SERVICE_TYPES.map(service => (
-                                        <button
-                                            key={service.id}
-                                            onClick={() => setSelectedService(service.id)}
-                                            className={`flex items-center gap-4 p-6 rounded-3xl border transition-all text-left group
-                                                ${selectedService === service.id
-                                                    ? 'bg-plaiz-blue/10 border-plaiz-blue/50 ring-4 ring-plaiz-blue/5'
-                                                    : 'bg-surface border-border hover:border-plaiz-blue/20'}`}
-                                        >
-                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${service.bg} ${service.color} group-hover:scale-110 transition-transform`}>
-                                                <service.icon size={24} />
-                                            </div>
-                                            <span className={`font-bold tracking-tight ${selectedService === service.id ? 'text-foreground' : 'text-muted'}`}>
-                                                {service.title}
-                                            </span>
-                                        </button>
-                                    ))}
+                            <div className="space-y-8">
+                                <div className="p-6 rounded-3xl bg-background border border-border flex gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-plaiz-blue/10 text-plaiz-blue flex items-center justify-center shrink-0">
+                                        <Zap size={20} />
+                                    </div>
+                                    <p className="text-xs font-bold text-muted uppercase tracking-widest leading-relaxed">
+                                        Our AI detects if you need Graphics, Web, or Printing instantly.
+                                    </p>
+                                </div>
+                                <div className="p-6 rounded-3xl bg-background border border-border flex gap-4 opacity-60">
+                                    <div className="w-10 h-10 rounded-xl bg-plaiz-coral/10 text-plaiz-coral flex items-center justify-center shrink-0">
+                                        <Loader2 size={20} />
+                                    </div>
+                                    <p className="text-xs font-bold text-muted uppercase tracking-widest leading-relaxed">
+                                        Top-rated experts are matched based on availability and skill level.
+                                    </p>
                                 </div>
                             </div>
                         </div>

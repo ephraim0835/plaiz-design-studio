@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import InstallPrompt from './components/InstallPrompt'
+import ReloadPrompt from './components/ReloadPrompt'
 import ThemeManager from './components/ThemeManager'
 import './styles/index.css'
 
@@ -122,6 +123,7 @@ function App() {
             <div className="grid-overlay" />
 
             <InstallPrompt />
+            <ReloadPrompt />
             <ThemeManager />
 
             <Routes>

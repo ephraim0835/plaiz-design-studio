@@ -109,7 +109,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
                     <h3 className="text-white font-black uppercase tracking-widest text-sm relative z-10">Secure Checkout</h3>
                     <div className="mt-4 flex flex-col items-center">
-                        <span className="text-white/60 text-xs font-bold uppercase tracking-wider">Total Amount</span>
+                        <span className="text-white/60 text-xs font-bold uppercase tracking-wider">
+                            {phase === 'deposit_40' ? 'Deposit Payment' : (phase === 'balance_60' ? 'Balance Payment' : 'Full Payment')}
+                        </span>
                         <span className="text-4xl font-black text-white tracking-tight mt-1">
                             ₦{amount.toLocaleString()}
                         </span>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, CreditCard, ChevronRight, Info, X, Download } from 'lucide-react';
+import { CheckCircle, XCircle, CreditCard, ChevronRight, Info, X, Download, Lock } from 'lucide-react';
 
 interface PriceProposalCardProps {
     amount: number;
@@ -277,11 +277,13 @@ export const SampleReviewCard: React.FC<SampleReviewCardProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <Info size={16} className="text-white/40" />
-                        <p className="text-[10px] text-white/50 leading-relaxed font-bold uppercase tracking-widest italic">
-                            Watermarked preview mode
-                        </p>
+                    <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <div className="flex items-center gap-3">
+                            <Lock size={16} className="text-amber-500" />
+                            <p className="text-[10px] text-white/50 leading-relaxed font-bold uppercase tracking-widest italic">
+                                Preview Mode — Files unlock after final payment
+                            </p>
+                        </div>
                     </div>
                 )}
 
@@ -381,8 +383,8 @@ export const SampleReviewCard: React.FC<SampleReviewCardProps> = ({
                     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center space-y-3">
                         {status !== 'completed' ? (
                             <>
-                                <p className="text-white/60 text-[10px] uppercase font-black tracking-widest">PREVIEW MODE</p>
-                                <p className="text-white/40 text-[9px]">High quality files unlock after payment</p>
+                                <p className="text-white/60 text-[10px] uppercase font-black tracking-widest">PREVIEW MODE — FILES UNLOCK AFTER FINAL PAYMENT</p>
+                                <p className="text-white/40 text-[9px]">High quality files are protected during review</p>
                             </>
                         ) : (
                             <>

@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 interface PayoutWithDetails extends Payout {
     projects: {
         title: string;
+        skill?: string;
     };
     profiles: {
         full_name: string;
@@ -153,16 +154,26 @@ const AdminPayoutsTab: React.FC = () => {
                                     </div>
 
                                     {/* Financials & Bank */}
-                                    <div className="flex flex-wrap gap-8 items-center bg-background/50 p-4 rounded-2xl border border-border/50">
+                                    <div className="flex flex-wrap gap-8 items-center bg-background/50 p-6 rounded-2xl border border-border/50">
                                         <div>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted block mb-1">Amount Due</span>
-                                            <span className="text-2xl font-black text-foreground">₦{(payout.amount * 0.60).toLocaleString()}</span>
-                                            <span className="text-[10px] text-muted ml-1 font-bold">(60%)</span>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted block mb-1">Total Amount</span>
+                                            <span className="text-xl font-black text-foreground">₦{payout.amount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="h-8 w-px bg-border hidden sm:block" />
+                                        <div>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500 block mb-1">Worker Share</span>
+                                            <span className="text-xl font-black text-emerald-500">₦{(payout.amount * (payout.projects?.skill === 'printing' ? 0.90 : 0.70)).toLocaleString()}</span>
+                                            <span className="text-[10px] text-muted ml-1 font-bold">{payout.projects?.skill === 'printing' ? '(90% Profit)' : '(70%)'}</span>
+                                        </div>
+                                        <div className="h-8 w-px bg-border hidden sm:block" />
+                                        <div>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-plaiz-blue block mb-1">Platform (30%)</span>
+                                            <span className="text-xl font-black text-plaiz-blue">₦{(payout.amount * (payout.projects?.skill === 'printing' ? 0.10 : 0.30)).toLocaleString()}</span>
                                         </div>
                                         <div className="h-8 w-px bg-border hidden sm:block" />
                                         {bank ? (
                                             <div>
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-muted block mb-1">Transfer To</span>
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-muted block mb-1">Worker Bank</span>
                                                 <div className="text-sm font-bold text-foreground">{bank.bank_name}</div>
                                                 <div className="text-xs font-mono text-muted">{bank.account_number}</div>
                                             </div>
@@ -195,7 +206,7 @@ const AdminPayoutsTab: React.FC = () => {
                                                 ) : (
                                                     <CheckCircle2 size={16} />
                                                 )}
-                                                Mark as Sent
+                                                Confirm as Paid
                                             </button>
                                         ) : (
                                             <div className={`px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-widest flex items-center gap-2

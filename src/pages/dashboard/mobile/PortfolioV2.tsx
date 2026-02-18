@@ -1,26 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Image as ImageIcon, ChevronRight, Zap, ExternalLink, ArrowRight } from 'lucide-react';
-import TopNav from '../../../components/dashboard/TopNav';
+import { Search, Zap } from 'lucide-react';
 import DashboardLayout from '../../../components/dashboard/DashboardLayout';
+import { supabase } from '../../../lib/supabaseClient';
+import PortfolioGrid from '../../../components/portfolio/PortfolioGrid';
 
-const PORTFOLIO_ITEMS: any[] = [];
+const categories = ['All Work', 'Graphic', 'Web', 'Print'];
 
 const PortfolioV2: React.FC = () => {
-    const [isLoading, setIsLoading] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState('All Work');
+    const [projects, setProjects] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
+        fetchProjects();
+
+        // Subscribe to real-time changes
+        const channel = supabase
+            .channel('portfolio-v2-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'portfolio' }, () => {
+                fetchProjects();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-12 h-12 border-4 border-muted/20 border-t-plaiz-blue rounded-full animate-spin mb-8 shadow-xl" />
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted">Opening Catalog...</p>
-            </div>
-        );
-    }
+    const fetchProjects = async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('portfolio')
+                .select(`
+                    *,
+                    profiles:worker_id (
+                        full_name
+                    )
+                `)
+                .eq('is_approved', true)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setProjects(data || []);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filteredProjects = selectedCategory === 'All Work'
+        ? projects
+        : projects.filter(project => {
+            const cat = project.service_type === 'web' ? 'Web' :
+                project.service_type === 'printing' ? 'Print' :
+                    project.service_type === 'graphics' ? 'Graphic' : 'Graphic';
+            return cat === selectedCategory;
+        });
 
     return (
         <DashboardLayout title="Studio Work">
@@ -45,11 +82,12 @@ const PortfolioV2: React.FC = () => {
                         />
                     </div>
                     <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1 w-full lg:w-auto">
-                        {['All Work', 'Graphic', 'Web', 'Print'].map((tab) => (
+                        {categories.map((tab) => (
                             <button
                                 key={tab}
+                                onClick={() => setSelectedCategory(tab)}
                                 className={`px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest border transition-all whitespace-nowrap
-                                    ${tab === 'All Work'
+                                    ${tab === selectedCategory
                                         ? 'bg-plaiz-blue text-white border-plaiz-blue shadow-md shadow-plaiz-blue/20'
                                         : 'bg-surface text-muted border-border hover:border-muted hover:text-foreground'}`}
                             >
@@ -59,39 +97,18 @@ const PortfolioV2: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Clean Masonry-like Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
-                    {PORTFOLIO_ITEMS.map((item, i) => (
-                        <div
-                            key={item.id}
-                            className={`bg-surface rounded-2xl overflow-hidden border border-border shadow-soft group hover:shadow-xl transition-all duration-500 cursor-pointer animate-in fade-in slide-in-from-bottom-4
-                                ${item.span}`}
-                            style={{ animationDelay: `${i * 100}ms` }}
-                        >
-                            <div className="relative overflow-hidden aspect-[4/5] bg-background">
-                                <img
-                                    src={item.image}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 opacity-90 group-hover:opacity-100"
-                                    alt={item.title}
-                                />
-                                <div className="absolute inset-0 bg-gradient-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
-                                    <button className="w-10 h-10 rounded-full bg-surface text-foreground flex items-center justify-center shadow-lg hover:bg-plaiz-blue hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-300">
-                                        <ExternalLink size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <h3 className="text-lg font-bold text-foreground mb-1">{item.title}</h3>
-                                <p className="text-[10px] text-muted font-bold uppercase tracking-widest">{item.category}</p>
-                            </div>
-                        </div>
-                    ))}
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <PortfolioGrid
+                        items={filteredProjects}
+                        loading={loading}
+                        showWorker={true}
+                    />
                 </div>
 
                 <div className="mt-20 text-center pb-16">
-                    <button className="px-10 py-4 bg-surface border border-border rounded-xl font-bold uppercase tracking-widest text-xs text-muted hover:bg-background transition-all active:scale-95 group flex items-center gap-4 mx-auto shadow-soft">
-                        Show More Projects <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    <p className="text-muted text-xs font-bold uppercase tracking-widest opacity-40">
+                        Showing {filteredProjects.length} projects
+                    </p>
                 </div>
             </main>
         </DashboardLayout>

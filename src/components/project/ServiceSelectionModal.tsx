@@ -41,16 +41,26 @@ const SERVICES: Service[] = [
 ];
 
 const ServiceSelectionModal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
-    const [selectedService, setSelectedService] = useState<Service | null>(null);
+    const [brief, setBrief] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     if (!isOpen) return null;
 
-    const handleSelect = (service: Service) => {
-        setSelectedService(service);
-        setTimeout(() => {
-            onSelect(service);
-            setSelectedService(null);
-        }, 200);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!brief.trim()) return;
+
+        setSubmitting(true);
+        // We pass a placeholder ID, the AI Orchestrator in the backend will overwrite it based on the description
+        onSelect({
+            id: 'graphic_design',
+            name: 'New Project',
+            description: brief,
+            icon: Zap,
+            color: 'plaiz-blue'
+        });
+        setBrief('');
+        setSubmitting(false);
     };
 
     return (
@@ -78,51 +88,46 @@ const ServiceSelectionModal: React.FC<Props> = ({ isOpen, onClose, onSelect }) =
                     </button>
                 </div>
 
-                {/* Services Grid */}
-                <div className="p-6 md:p-8 overflow-y-auto flex-1">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {SERVICES.map((service) => {
-                            const Icon = service.icon;
-                            const isSelected = selectedService?.id === service.id;
+                {/* AI-First Input Area */}
+                <div className="p-8 md:p-12">
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                        <div className="relative group">
+                            <textarea
+                                value={brief}
+                                onChange={(e) => setBrief(e.target.value)}
+                                placeholder="e.g. I need a modern logo for my tech startup..."
+                                className="w-full h-40 bg-background border-2 border-border rounded-3xl p-8 text-lg font-bold text-foreground focus:border-plaiz-blue transition-all outline-none resize-none placeholder:text-muted/30"
+                                autoFocus
+                            />
+                            <div className="absolute bottom-6 right-6 flex items-center gap-3">
+                                <span className={`text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${brief.length > 10 ? 'opacity-100' : 'opacity-0'} text-plaiz-blue`}>
+                                    AI Ready
+                                </span>
+                            </div>
+                        </div>
 
-                            return (
-                                <button
-                                    key={service.id}
-                                    onClick={() => handleSelect(service)}
-                                    className={`
-                                        relative p-8 rounded-2xl border text-left 
-                                        transition-all duration-300 group overflow-hidden
-                                        ${isSelected
-                                            ? 'bg-plaiz-blue/5 border-plaiz-blue/20 scale-[0.98]'
-                                            : 'bg-background border-border hover:border-plaiz-blue/20 hover:bg-surface active:scale-[0.98]'
-                                        }
-                                    `}
-                                >
-                                    <div className="p-4 rounded-xl mb-6 bg-plaiz-blue/10 text-plaiz-blue border border-plaiz-blue/20 inline-block group-hover:scale-110 transition-transform">
-                                        <Icon size={24} />
-                                    </div>
+                        <button
+                            type="submit"
+                            disabled={!brief.trim() || submitting}
+                            className={`w-full py-6 rounded-2xl font-black uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-4 transition-all
+                                ${brief.trim()
+                                    ? 'bg-plaiz-blue text-white shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95'
+                                    : 'bg-muted/10 text-muted/30 border border-border cursor-not-allowed'
+                                }
+                            `}
+                        >
+                            {submitting ? (
+                                <Zap size={18} className="animate-pulse" />
+                            ) : (
+                                <Zap size={18} className={brief.trim() ? 'fill-white' : ''} />
+                            )}
+                            {submitting ? 'Connecting...' : 'Start Matching'}
+                        </button>
 
-                                    <h3 className="text-lg font-bold text-foreground mb-2">
-                                        {service.name}
-                                    </h3>
-                                    <p className="text-xs text-muted font-medium leading-relaxed mb-4">
-                                        {service.description}
-                                    </p>
-
-                                    <div className="flex items-center gap-2 text-[10px] font-bold text-plaiz-blue uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1">
-                                        Select <ArrowRight size={14} />
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* Footer Info */}
-                    <div className="mt-8 p-6 rounded-2xl bg-background border border-border text-center">
-                        <p className="text-xs text-muted font-bold uppercase tracking-widest">
-                            ⚡ Fast Results • Fair Pricing • Real Experts
+                        <p className="text-center text-[10px] text-muted/40 font-bold uppercase tracking-[0.2em]">
+                            AntiGravity AI will detect your project type and assign the best expert instantly.
                         </p>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>

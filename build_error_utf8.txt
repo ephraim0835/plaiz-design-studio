@@ -1,0 +1,190 @@
+﻿[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 2224 modules transformed.
+rendering chunks...
+node : [1m[33m[plugin:vi
+te:reporter][39m[22m 
+[33m[plugin 
+vite:reporter] 
+At line:1 char:1
++ node node_modules/vite/b
+in/vite.js build > 
+build_error.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (  
+  [1m[33m[plugi...vite   
+ :reporter] :String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+(!) C:/Users/Plaiz/Documen
+ts/plaiz design website/sr
+c/lib/supabaseClient.js 
+is dynamically imported 
+by C:/Users/Plaiz/Document
+s/plaiz design website/src
+/components/ProtectedRoute
+.jsx but also statically 
+imported by C:/Users/Plaiz
+/Documents/plaiz design we
+bsite/src/components/chat/
+ProjectChat.tsx, C:/Users/
+Plaiz/Documents/plaiz 
+design website/src/compone
+nts/dashboard/BankDetailsS
+ection.tsx, C:/Users/Plaiz
+/Documents/plaiz design we
+bsite/src/components/proje
+ct/AgreementCard.tsx, C:/U
+sers/Plaiz/Documents/plaiz
+ design website/src/compon
+ents/project/CompletionMod
+al.tsx, C:/Users/Plaiz/Doc
+uments/plaiz design websit
+e/src/components/project/D
+eliverableUpload.tsx, C:/U
+sers/Plaiz/Documents/plaiz
+ design website/src/compon
+ents/project/PaymentModal.
+tsx, C:/Users/Plaiz/Docume
+nts/plaiz design website/s
+rc/components/project/Revi
+ewModal.tsx, C:/Users/Plai
+z/Documents/plaiz design w
+ebsite/src/context/AuthCon
+text.tsx, C:/Users/Plaiz/D
+ocuments/plaiz design webs
+ite/src/hooks/useInviteCod
+es.js, C:/Users/Plaiz/Docu
+ments/plaiz design website
+/src/hooks/useMessages.ts,
+ C:/Users/Plaiz/Documents/
+plaiz design website/src/h
+ooks/useNotifications.ts, 
+C:/Users/Plaiz/Documents/p
+laiz design website/src/ho
+oks/useProjects.ts, C:/Use
+rs/Plaiz/Documents/plaiz 
+design website/src/hooks/u
+seWorkers.js, C:/Users/Pla
+iz/Documents/plaiz design 
+website/src/pages/Portfoli
+o.jsx, C:/Users/Plaiz/Docu
+ments/plaiz design website
+/src/pages/ProjectDashboar
+d.tsx, C:/Users/Plaiz/Docu
+ments/plaiz design website
+/src/pages/dashboard/Admin
+Dashboard.tsx, C:/Users/Pl
+aiz/Documents/plaiz 
+design website/src/pages/d
+ashboard/AdminPayoutsTab.t
+sx, C:/Users/Plaiz/Documen
+ts/plaiz design website/sr
+c/pages/dashboard/AdminUse
+rs.tsx, C:/Users/Plaiz/Doc
+uments/plaiz design websit
+e/src/pages/dashboard/Clie
+ntDashboard.tsx, C:/Users/
+Plaiz/Documents/plaiz 
+design website/src/pages/d
+ashboard/GalleryTab.tsx, C
+:/Users/Plaiz/Documents/pl
+aiz design website/src/pag
+es/dashboard/PaymentsTab.t
+sx, C:/Users/Plaiz/Documen
+ts/plaiz design website/sr
+c/pages/dashboard/Settings
+Tab.tsx, C:/Users/Plaiz/Do
+cuments/plaiz design websi
+te/src/pages/dashboard/mob
+ile/ProfileV2.tsx, C:/User
+s/Plaiz/Documents/plaiz 
+design website/src/pages/d
+ashboard/mobile/SupportV2.
+tsx, C:/Users/Plaiz/Docume
+nts/plaiz design website/s
+rc/services/paymentService
+.ts, dynamic import will 
+not move module into 
+another chunk.
+[39m
+computing gzip size...
+[2mdist/[22m[32mmanifest.webmanifest                        [39m[1m[2m    0.38 kB[22m[1m[22m
+[2mdist/[22m[32mindex.html                                  [39m[1m[2m    1.39 kB[22m[1m[22m[2m Ôöé gzip:   0.72 kB[22m
+[2mdist/[22m[35massets/index-DWv-BfNu.css                   [39m[1m[2m  142.95 kB[22m[1m[22m[2m Ôöé gzip:  21.92 kB[22m
+[2mdist/[22m[36massets/workbox-window.prod.es5-HIF29O9Z.js  [39m[1m[2m    8.12 kB[22m[1m[22m[2m Ôöé gzip:   2.72 kB[22m
+[2mdist/[22m[36massets/index-BkSLATNf.js                    [39m[1m[33m2,431.39 kB[39m[22m[2m Ôöé gzip: 483.73 kB[22m
+[32mÔ£ô built in 6.00s[39m
+[31merror during build:
+Error: 
+  Configure "workbox.maxim
+umFileSizeToCacheInBytes" 
+to change the limit: the 
+default value is 2 MiB.
+  Check https://vite-pwa-o
+rg.netlify.app/guide/faq.h
+tml#missing-assets-from-sw
+-precache-manifest for 
+more information.
+  Assets exceeding the 
+limit:
+  - 
+assets/index-BkSLATNf.js 
+is 2.43 MB, and won't be 
+precached.
+
+    at logWorkboxResult (f
+ile:///C:/Users/Plaiz/Docu
+ments/plaiz%20design%20web
+site/node_modules/vite-plu
+gin-pwa/dist/chunk-G4TAN34
+B.js:44:13)
+    at 
+generateServiceWorker (fil
+e:///C:/Users/Plaiz/Docume
+nts/plaiz%20design%20websi
+te/node_modules/vite-plugi
+n-pwa/dist/index.js:209:3)
+    at async _generateSW (
+file:///C:/Users/Plaiz/Doc
+uments/plaiz%20design%20we
+bsite/node_modules/vite-pl
+ugin-pwa/dist/index.js:234
+:5)
+    at async 
+Object.handler (file:///C:
+/Users/Plaiz/Documents/pla
+iz%20design%20website/node
+_modules/vite-plugin-pwa/d
+ist/index.js:418:13)
+    at async 
+PluginDriver.hookParallel 
+(file:///C:/Users/Plaiz/Do
+cuments/plaiz%20design%20w
+ebsite/node_modules/rollup
+/dist/es/shared/node-entry
+.js:22452:17)
+    at async Object.close 
+(file:///C:/Users/Plaiz/Do
+cuments/plaiz%20design%20w
+ebsite/node_modules/rollup
+/dist/es/shared/node-entry
+.js:23471:13)
+    at async build (file:/
+//C:/Users/Plaiz/Documents
+/plaiz%20design%20website/
+node_modules/vite/dist/nod
+e/chunks/dep-BK3b2jBa.js:6
+5732:17)
+    at async 
+CAC.<anonymous> (file:///C
+:/Users/Plaiz/Documents/pl
+aiz%20design%20website/nod
+e_modules/vite/dist/node/c
+li.js:829:5)[39m
