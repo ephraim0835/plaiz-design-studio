@@ -37,14 +37,22 @@ serve(async (req) => {
         })
 
         const analysisData = await analysisResponse.json()
-        const detectedRole = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Graphic Designer'
+        const rawRole = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Graphic Designer'
 
-        // Clean up role (sometimes Gemini adds formatting)
-        const validRoles = ['Graphic Designer', 'Web Designer', 'Print Specialist']
-        const role = validRoles.find(r => detectedRole.includes(r)) || 'Graphic Designer'
+        // 1.5 Map Gemini roles to db-friendly snake_case
+        const roleMapping: Record<string, string> = {
+            'Graphic Designer': 'graphic_designer',
+            'Web Designer': 'web_designer',
+            'Print Specialist': 'print_specialist'
+        }
+
+        const role = roleMapping[rawRole as keyof typeof roleMapping] || 'graphic_designer'
 
         // 2. Update Project Type & Trigger Worker Matching RPC (V2)
-        await supabase.from('projects').update({ project_type: role, status: 'matching' }).eq('id', projectId)
+        await supabase.from('projects').update({
+            project_type: role,
+            status: 'matching'
+        }).eq('id', projectId)
 
         const { data: workerId, error: matchError } = await supabase.rpc('match_worker_v2', {
             p_role: role,
@@ -60,8 +68,19 @@ serve(async (req) => {
             headers: { "Content-Type": "application/json" },
         })
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Orchestration Error:', error.message)
+
+        // Safety Fallback: Set to NO_WORKER_AVAILABLE so it's not "stuck"
+        try {
+            const { record } = await req.clone().json()
+            await supabase.from('projects')
+                .update({ status: 'NO_WORKER_AVAILABLE', rejection_reason: `Orchestration Error: ${error.message}` })
+                .eq('id', record.id)
+        } catch (fallbackError) {
+            console.error('Critical Fail: Could not reset project status:', fallbackError)
+        }
+
         return new Response(JSON.stringify({ error: error.message }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
