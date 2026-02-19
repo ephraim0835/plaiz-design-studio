@@ -371,6 +371,35 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
         }
     };
 
+    const handleRequestChanges = async () => {
+        if (!agreement) return;
+        try {
+            // Mark agreement as revision requested
+            await supabase
+                .from('agreements')
+                .update({ status: 'revision_requested', client_agreed: false })
+                .eq('id', agreement.id);
+
+            // Reset project to in_progress so worker can re-submit
+            await supabase
+                .from('projects')
+                .update({ status: 'in_progress' })
+                .eq('id', projectId);
+
+            // Post a system message so the worker sees what to fix
+            await supabase.from('messages').insert({
+                project_id: projectId,
+                sender_id: user.id,
+                content: '🔄 The client has requested revisions to your proposal. Please review their feedback and submit an updated quote.',
+                is_system_message: true,
+                payload: { type: 'revision_request' }
+            });
+        } catch (err: any) {
+            console.error('Error requesting changes:', err);
+            alert('Could not request changes: ' + err.message);
+        }
+    };
+
     const handleProposalSubmit = async (amount: number, deliverables: string, timeline: string, notes: string, cost?: number) => {
         try {
             // Calculate profit for printing
@@ -392,6 +421,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
             alert('Failed to submit proposal: ' + err.message);
         }
     };
+
 
     const handleAcceptProposal = async () => {
         try {
@@ -659,7 +689,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                                                     isInBlueBubble={isMe}
                                                     status={agreement?.status || 'pending'}
                                                     onAccept={handleAcceptProposal}
-                                                    onRequestChanges={() => alert('Feature coming soon')}
+                                                    onRequestChanges={handleRequestChanges}
                                                     {...({} as any)}
                                                 />
                                             ) : msg.payload?.type === 'payment_request' ? (
