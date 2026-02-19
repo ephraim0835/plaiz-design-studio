@@ -53,25 +53,33 @@ const AdminDashboard: React.FC = () => {
         fetchUserCount();
     }, []);
 
-    const [isEditing, setIsEditing] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [assignFeedback, setAssignFeedback] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
 
     const handleForceAssign = async (workerId: string) => {
         if (!selectedProjectId) return;
-        setActionLoading(selectedProjectId);
+        setActionLoading(workerId);
+        setAssignFeedback(null);
         try {
             const project = projects.find(p => p.id === selectedProjectId);
             const oldWorkerId = project?.worker_id;
-            const { error } = await supabase.from('projects').update({ worker_id: workerId, status: 'in_progress', assignment_method: 'admin_override' }).eq('id', selectedProjectId);
+            // Update project: assign worker + set status to 'assigned'
+            const { error } = await supabase
+                .from('projects')
+                .update({ worker_id: workerId, status: 'assigned', assignment_deadline: new Date(Date.now() + 3600000).toISOString() })
+                .eq('id', selectedProjectId);
             if (error) throw error;
-            await supabase.rpc('increment_worker_active_projects', { worker_id_param: workerId });
+            // Best-effort RPC calls (silent fail)
+            try { await supabase.rpc('increment_worker_active_projects', { worker_id_param: workerId }); } catch (e) { }
             if (oldWorkerId && oldWorkerId !== workerId) {
                 try { await supabase.rpc('decrement_worker_active_projects', { worker_id_param: oldWorkerId }); } catch (e) { }
             }
+            setAssignFeedback({ type: 'success', msg: 'Expert assigned successfully! They have 1 hour to accept.' });
             refetchProjects();
-            setShowReasoning(false);
+            setTimeout(() => { setShowReasoning(false); setAssignFeedback(null); }, 2500);
         } catch (err: any) {
             console.error('Reassignment error:', err);
+            setAssignFeedback({ type: 'error', msg: `Assignment failed: ${err.message}` });
         } finally {
             setActionLoading(null);
         }
@@ -296,11 +304,18 @@ const AdminDashboard: React.FC = () => {
                                         </div>
                                         <div className="flex-1 overflow-hidden relative">
                                             {showReasoning ? (
-                                                <div className="p-8 h-full overflow-y-auto">
+                                                <div className="p-8 h-full overflow-y-auto space-y-4">
+                                                    {/* Feedback Banner */}
+                                                    {assignFeedback && (
+                                                        <div className={`p-4 rounded-2xl flex items-center gap-3 font-medium text-sm ${assignFeedback.type === 'success' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-400 border border-rose-500/20'}`}>
+                                                            {assignFeedback.type === 'success' ? '✅' : '❌'} {assignFeedback.msg}
+                                                        </div>
+                                                    )}
                                                     <AssignmentDetails
                                                         metadata={projects.find(p => p.id === selectedProjectId)?.assignment_metadata}
                                                         workers={workers}
                                                         onReassign={handleForceAssign}
+                                                        actionLoading={actionLoading}
                                                     />
                                                 </div>
                                             ) : (

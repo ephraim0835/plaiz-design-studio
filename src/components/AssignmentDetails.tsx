@@ -2,12 +2,13 @@ import React from 'react';
 import { ShieldCheck, Zap, Clock, Star, AlertTriangle, Users } from 'lucide-react';
 
 interface AssignmentDetailsProps {
-    metadata: any; // JSONB from DB
+    metadata: any;
     workers: any[];
     onReassign: (workerId: string) => void;
+    actionLoading?: string | null;
 }
 
-const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ metadata, workers, onReassign }) => {
+const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ metadata, workers, onReassign, actionLoading }) => {
     const hasScore = metadata?.match_score;
     const { total, breakdown } = hasScore ? metadata.match_score : { total: 0, breakdown: {} };
     const isHighMatch = total >= 80;
@@ -70,13 +71,20 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ metadata, workers
                             <button
                                 key={worker.id}
                                 onClick={() => onReassign(worker.id)}
-                                className="w-full flex items-center justify-between p-3 rounded-xl bg-background hover:bg-surface border border-border transition-all group hover:border-plaiz-blue/20 shadow-sm"
+                                disabled={!!actionLoading}
+                                className={`w-full flex items-center justify-between p-3 rounded-xl bg-background border border-border transition-all group shadow-sm
+                                    ${actionLoading === worker.id ? 'opacity-70 border-plaiz-blue/30' : 'hover:bg-surface hover:border-plaiz-blue/20'}`}
                             >
                                 <div>
                                     <span className="text-sm font-bold text-foreground">{worker.full_name || 'Unknown'}</span>
                                     <p className="text-[10px] text-muted uppercase tracking-wider capitalize">{worker.role?.replace(/_/g, ' ')}</p>
                                 </div>
-                                <span className="text-[10px] text-muted group-hover:text-plaiz-cyan uppercase font-bold tracking-wider px-3 py-1 rounded-lg border border-border group-hover:border-plaiz-cyan/30 transition-all">Assign →</span>
+                                <span className={`text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-lg border transition-all
+                                    ${actionLoading === worker.id
+                                        ? 'text-plaiz-blue border-plaiz-blue/30 animate-pulse'
+                                        : 'text-muted border-border group-hover:text-plaiz-cyan group-hover:border-plaiz-cyan/30'}`}>
+                                    {actionLoading === worker.id ? 'Assigning...' : 'Assign →'}
+                                </span>
                             </button>
                         ))}
                     </div>
