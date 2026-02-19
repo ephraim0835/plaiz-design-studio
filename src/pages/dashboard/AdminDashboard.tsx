@@ -312,6 +312,7 @@ const AdminDashboard: React.FC = () => {
                                                         </div>
                                                     )}
                                                     <AssignmentDetails
+                                                        project={projects.find(p => p.id === selectedProjectId)}
                                                         metadata={projects.find(p => p.id === selectedProjectId)?.assignment_metadata}
                                                         workers={workers}
                                                         onReassign={handleForceAssign}

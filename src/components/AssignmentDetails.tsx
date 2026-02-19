@@ -2,19 +2,32 @@ import React from 'react';
 import { ShieldCheck, Zap, Clock, Star, AlertTriangle, Users } from 'lucide-react';
 
 interface AssignmentDetailsProps {
+    project: any;
     metadata: any;
     workers: any[];
     onReassign: (workerId: string) => void;
     actionLoading?: string | null;
 }
 
-const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ metadata, workers, onReassign, actionLoading }) => {
+const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ project, metadata, workers, onReassign, actionLoading }) => {
     const hasScore = metadata?.match_score;
     const { total, breakdown } = hasScore ? metadata.match_score : { total: 0, breakdown: {} };
     const isHighMatch = total >= 80;
 
     return (
         <div className="space-y-6">
+            {/* Project Brief Section */}
+            <div className="bg-surface/50 p-5 rounded-2xl border border-border">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted block mb-2">Project Brief</span>
+                <h3 className="text-xl font-black text-foreground mb-2">{project?.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{project?.description}</p>
+
+                <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border/50">
+                    <span className="px-2 py-1 bg-plaiz-blue/10 text-plaiz-blue rounded text-[10px] font-bold uppercase tracking-wider">{project?.skill}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{new Date(project?.created_at).toLocaleDateString()}</span>
+                </div>
+            </div>
+
             <h3 className="text-lg font-black text-foreground flex items-center gap-2">
                 <Zap className="text-plaiz-cyan" size={20} />
                 AI Match Reasoning
