@@ -59,9 +59,9 @@ const MessagesTab = () => {
                                 filteredProjects.map(project => (
                                     <button
                                         key={project.id}
-                                        onClick={() => project.status !== 'matching' && setSearchParams({ project: project.id })}
+                                        onClick={() => setSearchParams({ project: project.id })}
                                         className={`w-full p-5 rounded-[28px] transition-all text-left flex items-center gap-5 group relative overflow-hidden
-                                        ${project.status === 'matching' ? 'opacity-60 grayscale-[0.5] cursor-default' : ''}
+                                        ${project.status === 'matching' ? 'bg-accent/5' : ''}
                                         ${selectedProjectId === project.id
                                                 ? 'bg-plaiz-blue text-white shadow-2xl shadow-plaiz-blue/30'
                                                 : 'hover:bg-accent/5 text-foreground'}`}
@@ -79,11 +79,17 @@ const MessagesTab = () => {
                                                 </h5>
                                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full
                                                 ${selectedProjectId === project.id ? 'bg-white/20 text-white' : 'bg-accent/10 text-muted-foreground'}`}>
-                                                    {project.status === 'matching' ? 'Matching' : project.status.split('_')[0]}
+                                                    {project.status === 'matching' ? 'Finding Expert' :
+                                                        project.status === 'NO_WORKER_AVAILABLE' ? 'On Hold' :
+                                                            project.status.split('_')[0]}
                                                 </span>
                                             </div>
                                             <p className={`text-[13px] truncate font-medium ${selectedProjectId === project.id ? 'text-white/70' : 'text-muted-foreground/50'}`}>
-                                                {project.last_message ? (
+                                                {project.status === 'matching' ? (
+                                                    <span className="italic animate-pulse">AI Orchestrator is matching you...</span>
+                                                ) : project.status === 'NO_WORKER_AVAILABLE' ? (
+                                                    <span className="text-rose-500/60">No expert found. Pending review.</span>
+                                                ) : project.last_message ? (
                                                     <>
                                                         <span className={`font-bold mr-1 ${selectedProjectId === project.id ? 'text-white/60' : 'text-plaiz-blue/60'}`}>
                                                             {project.last_message.sender_id === profile?.id ? 'You' : project.last_message.sender_name?.split(' ')[0]}:

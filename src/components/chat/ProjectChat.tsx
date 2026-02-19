@@ -109,6 +109,35 @@ const MatchingOverlay = () => (
     </div>
 );
 
+const NoWorkerOverlay = () => (
+    <div className="absolute inset-0 z-[100] bg-background/90 backdrop-blur-2xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
+        <div className="relative mb-12">
+            <div className="w-32 h-32 rounded-[48px] bg-rose-500/10 flex items-center justify-center relative overflow-hidden">
+                <ShieldAlert size={56} className="text-rose-500 animate-pulse relative z-10" />
+            </div>
+            <div className="absolute -inset-4 border border-rose-500/5 rounded-full" />
+        </div>
+
+        <div className="max-w-md space-y-6">
+            <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.5em] mb-2">System Alert</span>
+                <h3 className="text-4xl lg:text-5xl font-black text-foreground tracking-tighter leading-none">
+                    Manual Review <br />
+                    <span className="text-rose-500 underline decoration-rose-500/20 underline-offset-8">Required.</span>
+                </h3>
+            </div>
+
+            <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest max-w-sm leading-relaxed opacity-60">
+                Our AI couldn't find an available expert matching your exact criteria right now. An administrator has been notified to manually assign a specialist to your project.
+            </p>
+
+            <div className="flex flex-col items-center gap-4 pt-8">
+                <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.3em]">Support Ticket Created</span>
+            </div>
+        </div>
+    </div>
+);
+
 const AcceptanceOverlay: React.FC<{
     project: any,
     onAccept: () => void,
@@ -211,8 +240,9 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const isMatching = project?.status === 'matching';
+    const isNoWorker = project?.status === 'NO_WORKER_AVAILABLE';
     const isAssignedPending = project?.status === 'assigned' && currentUserRole === 'worker';
-    const isChatLocked = project?.status === 'assigned' || project?.status === 'matching';
+    const isChatLocked = project?.status === 'assigned' || project?.status === 'matching' || project?.status === 'NO_WORKER_AVAILABLE';
 
     useEffect(() => {
         const fetchProjectData = async () => {
@@ -512,6 +542,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
         <div className={`flex flex-col h-[100svh] lg:h-full overflow-hidden relative transition-all duration-500 chat-stage-bg lg:rounded-2xl z-20`}>
 
             {isMatching && <MatchingOverlay />}
+            {isNoWorker && <NoWorkerOverlay />}
             {isAssignedPending && (
                 <AcceptanceOverlay
                     project={project}
