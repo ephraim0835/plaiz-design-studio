@@ -536,19 +536,38 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
 
     const handleDeclineWork = async () => {
         const reason = prompt("Why can't you take this project? (e.g. Too busy, Deadline too short, Not skilled for this)");
-        if (reason === null) return;
+        if (!reason) return;
 
         try {
-            await supabase.from('projects').update({
-                status: 'matching',
-                worker_id: null,
-                rejection_reason: reason || 'Worker declined'
-            }).eq('id', projectId);
+            const { error } = await supabase.rpc('request_reassignment', {
+                p_project_id: projectId,
+                p_reason: reason
+            });
 
-            await fetch('/api/reassign-project', { method: 'POST', body: JSON.stringify({ projectId }) }).catch(() => { });
+            if (error) throw error;
             alert("Project declined. Finding next expert...");
+            // Optional: redirect or refresh
         } catch (err: any) {
             alert("Error declining: " + err.message);
+        }
+    };
+
+    const handleClientReassign = async () => {
+        if (!confirm("Are you sure? This will remove the current expert and find a new one. This is only allowed if NO payments have been made.")) return;
+        const reason = prompt("Please provide a reason for reassignment:");
+        if (!reason) return;
+
+        try {
+            const { error } = await supabase.rpc('request_reassignment', {
+                p_project_id: projectId,
+                p_reason: reason
+            });
+
+            if (error) throw error;
+            alert("Reassignment requested. We are finding a new expert for you.");
+            setShowActionsDropdown(false);
+        } catch (err: any) {
+            alert("Failed to reassign: " + err.message);
         }
     };
 
@@ -567,6 +586,8 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
         const date = new Date(dateStr);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
+
+    const [showActionsDropdown, setShowActionsDropdown] = useState(false);
 
     return (
         <div className={`flex flex-col h-[100svh] lg:h-full overflow-hidden relative transition-all duration-500 chat-stage-bg lg:rounded-2xl z-20`}>
@@ -596,6 +617,33 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                         </div>
                     </div>
                 </div>
+
+                {/* Client Actions Dropdown */}
+                {currentUserRole === 'client' && !isChatLocked && (
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowActionsDropdown(!showActionsDropdown)}
+                            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors"
+                        >
+                            <MoreVertical size={20} className="text-muted-foreground" />
+                        </button>
+
+                        {showActionsDropdown && (
+                            <>
+                                <div className="fixed inset-0 z-[40]" onClick={() => setShowActionsDropdown(false)} />
+                                <div className="absolute right-0 top-12 w-48 bg-background border border-border rounded-xl shadow-xl z-[50] p-1 animate-in fade-in zoom-in-95 duration-200">
+                                    <button
+                                        onClick={handleClientReassign}
+                                        className="w-full text-left px-4 py-3 text-sm font-medium text-rose-500 hover:bg-rose-500/10 rounded-lg flex items-center gap-2"
+                                    >
+                                        <ShieldAlert size={14} />
+                                        Request Reassignment
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="flex flex-col gap-0 lg:gap-0">
