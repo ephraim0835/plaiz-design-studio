@@ -155,17 +155,33 @@ const AdminDashboard: React.FC = () => {
 
                         {/* Stats Summary */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-                            {stats.map((stat, i) => (
-                                <div key={i} className="bg-surface p-8 rounded-2xl border border-border shadow-soft hover:shadow-md transition-all group">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="p-3 bg-background rounded-xl text-plaiz-blue group-hover:bg-plaiz-blue/10 transition-colors">
-                                            <stat.icon size={20} />
+                            {stats.map((stat, i) => {
+                                // Map stat title to filter keys
+                                const filterMap: Record<string, string> = {
+                                    'Total Projects': 'all',
+                                    'Queued': 'pending',
+                                    'Active': 'in_progress'
+                                };
+                                const filterKey = filterMap[stat.title];
+
+                                return (
+                                    <button
+                                        key={i}
+                                        onClick={() => filterKey && setStatusFilter(filterKey)}
+                                        className={`bg-surface p-8 rounded-2xl border shadow-soft transition-all group text-left
+                                            ${filterKey ? 'hover:shadow-md hover:border-plaiz-blue/30 active:scale-95 cursor-pointer' : 'cursor-default'}
+                                            ${statusFilter === filterKey ? 'border-plaiz-blue/50 ring-1 ring-plaiz-blue/20 bg-plaiz-blue/5' : 'border-border'}`}
+                                    >
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="p-3 bg-background rounded-xl text-plaiz-blue group-hover:bg-plaiz-blue/10 transition-colors">
+                                                <stat.icon size={20} />
+                                            </div>
+                                            <span className="text-3xl font-extrabold text-foreground">{stat.value}</span>
                                         </div>
-                                        <span className="text-3xl font-extrabold text-foreground">{stat.value}</span>
-                                    </div>
-                                    <p className="text-[10px] font-bold text-muted/60 uppercase tracking-widest">{stat.title}</p>
-                                </div>
-                            ))}
+                                        <p className="text-[10px] font-bold text-muted/60 uppercase tracking-widest">{stat.title}</p>
+                                    </button>
+                                );
+                            })}
                             {/* Gallery Quick Link */}
                             <Link to="/admin/gallery" className="bg-plaiz-blue p-8 rounded-2xl border border-plaiz-blue/30 shadow-xl shadow-plaiz-blue/10 hover:shadow-plaiz-blue/20 hover:scale-[1.02] active:scale-95 transition-all group">
                                 <div className="flex items-center justify-between mb-4">
