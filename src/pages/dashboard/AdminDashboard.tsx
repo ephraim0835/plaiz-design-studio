@@ -261,9 +261,9 @@ const AdminDashboard: React.FC = () => {
                             </div>
 
                             {/* Audit Stage (Detail View) */}
-                            <div className={`h-[calc(100vh-140px)] lg:h-[650px] lg:sticky lg:top-24 flex flex-col bg-surface overflow-hidden transition-all ${selectedProjectId
-                                ? 'fixed inset-0 z-50 bg-background lg:static lg:z-auto lg:rounded-3xl lg:border lg:border-border lg:shadow-xl'
-                                : 'hidden lg:flex lg:col-span-8 lg:rounded-3xl lg:border lg:border-border lg:shadow-xl'
+                            <div className={`lg:col-span-8 lg:h-[650px] lg:sticky lg:top-24 flex flex-col bg-surface overflow-hidden transition-all lg:rounded-3xl lg:border lg:border-border lg:shadow-xl ${selectedProjectId
+                                ? 'fixed inset-0 z-50 bg-background lg:static lg:z-auto'
+                                : 'hidden lg:flex'
                                 }`}>
                                 {selectedProjectId ? (
                                     <>
