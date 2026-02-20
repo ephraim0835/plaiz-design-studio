@@ -147,14 +147,14 @@ export const useProjects = (filter: ProjectFilter = {}, userRole?: string, userI
 
     const createProject = async (projectData: Partial<Project>) => {
         try {
-            // 1. Insert the project
+            // 1. Insert the project with 'matching' status
             const { data, error: insertError } = await supabase
                 .from('projects')
                 .insert([
                     {
                         ...projectData,
                         created_at: new Date().toISOString(),
-                        status: 'matching' // Default status for AI-first orchestration
+                        status: 'matching' // Will be updated by orchestrator
                     }
                 ])
                 .select()
@@ -162,33 +162,41 @@ export const useProjects = (filter: ProjectFilter = {}, userRole?: string, userI
 
             if (insertError) throw insertError
 
-            // 2. Attempt Auto-Assignment (New Format: AI Fair Rotation)
-            if (data && data.status === 'matching' && !data.worker_id) {
+            // 2. Call the antigravity-orchestrator Edge Function directly
+            // This is more reliable than relying on a webhook (which can fail silently)
+            if (data?.id) {
                 try {
-                    const projectBudget = data.assignment_metadata?.budget_ngn || 0;
+                    const { error: fnError } = await supabase.functions.invoke('antigravity-orchestrator', {
+                        body: {
+                            type: 'INSERT',
+                            record: {
+                                id: data.id,
+                                title: data.title,
+                                description: data.description,
+                                status: 'matching'
+                            }
+                        }
+                    });
 
-                    // Normalize skill for the matching algorithm
-                    let skill = data.project_type || 'graphic_design';
-                    if (skill === 'graphic_design') skill = 'graphics';
-                    if (skill === 'web_design') skill = 'web';
-
-                    const { error: rpcError } = await supabase
-                        .rpc('match_worker_to_project', {
-                            p_project_id: data.id,
-                            p_skill: skill,
-                            p_budget: projectBudget
-                        });
-
-                    if (rpcError) {
-                        console.error('Matching Error:', rpcError);
-                        // Fallback to queued if database error occurs
+                    if (fnError) {
+                        console.error('[Orchestrator] Edge Function error:', fnError);
+                        // Safety fallback: If orchestrator fails, set to NO_WORKER_AVAILABLE
+                        // so the project is NOT stuck in 'matching' forever
                         await supabase
                             .from('projects')
-                            .update({ status: 'matching' })
+                            .update({
+                                status: 'NO_WORKER_AVAILABLE',
+                                rejection_reason: `Orchestration failed: ${fnError.message}`
+                            })
                             .eq('id', data.id);
                     }
-                } catch (assignErr) {
-                    console.warn('Auto-assignment failed (silent fail):', assignErr);
+                } catch (fnErr: any) {
+                    console.warn('[Orchestrator] Critical fallback triggered:', fnErr);
+                    // Hard fallback: ensure project is never stuck
+                    await supabase
+                        .from('projects')
+                        .update({ status: 'NO_WORKER_AVAILABLE', rejection_reason: 'Orchestration unavailable' })
+                        .eq('id', data.id);
                 }
             }
 
