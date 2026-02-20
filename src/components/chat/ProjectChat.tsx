@@ -13,6 +13,7 @@ import {
     MoreVertical,
     CheckCheck,
     X,
+    XCircle,
     Play,
     Pause,
     DollarSign,
@@ -138,6 +139,43 @@ const NoWorkerOverlay = () => (
     </div>
 );
 
+const CancelledOverlay = ({ reason }: { reason?: string }) => (
+    <div className="absolute inset-0 z-[100] bg-background/95 backdrop-blur-2xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
+        <div className="relative mb-12">
+            <div className="w-32 h-32 rounded-[48px] bg-muted/30 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-transparent" />
+                <XCircle size={56} className="text-muted-foreground relative z-10" />
+            </div>
+            <div className="absolute -inset-4 border border-muted/20 rounded-full" />
+        </div>
+
+        <div className="max-w-md space-y-6">
+            <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] mb-2">Project Closed</span>
+                <h3 className="text-4xl lg:text-5xl font-black text-foreground tracking-tighter leading-none">
+                    Project <br />
+                    <span className="text-muted-foreground underline decoration-muted/20 underline-offset-8">Cancelled.</span>
+                </h3>
+            </div>
+
+            {reason && (
+                <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest max-w-sm leading-relaxed opacity-60">
+                    {reason}
+                </p>
+            )}
+            {!reason && (
+                <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest max-w-sm leading-relaxed opacity-60">
+                    This project has been cancelled and is no longer active. Please contact support if you believe this was a mistake.
+                </p>
+            )}
+
+            <div className="flex flex-col items-center gap-4 pt-8">
+                <span className="text-[9px] font-black text-muted-foreground/20 uppercase tracking-[0.3em]">No Further Action Required</span>
+            </div>
+        </div>
+    </div>
+);
+
 const AcceptanceOverlay: React.FC<{
     project: any,
     onAccept: () => void,
@@ -241,8 +279,9 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
 
     const isMatching = project?.status === 'matching';
     const isNoWorker = project?.status === 'NO_WORKER_AVAILABLE';
+    const isCancelled = project?.status === 'cancelled';
     const isAssignedPending = project?.status === 'assigned' && currentUserRole === 'worker';
-    const isChatLocked = project?.status === 'assigned' || project?.status === 'matching' || project?.status === 'NO_WORKER_AVAILABLE';
+    const isChatLocked = project?.status === 'assigned' || project?.status === 'matching' || project?.status === 'NO_WORKER_AVAILABLE' || project?.status === 'cancelled';
 
     useEffect(() => {
         const fetchProjectData = async () => {
@@ -594,6 +633,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
 
             {isMatching && <MatchingOverlay />}
             {isNoWorker && <NoWorkerOverlay />}
+            {isCancelled && <CancelledOverlay reason={project?.rejection_reason} />}
             {isAssignedPending && (
                 <AcceptanceOverlay
                     project={project}
