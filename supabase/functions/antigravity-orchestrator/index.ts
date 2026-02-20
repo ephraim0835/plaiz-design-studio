@@ -18,6 +18,7 @@ serve(async (req) => {
         - Graphic Designer (Logos, Flyers, Branding, Social Media)
         - Web Designer (Websites, Dashboards, UI/UX)
         - Print Specialist (Banners, Business Cards, Packaging, Clothing Prints)
+        - Unserviceable (If the request is vague, spam, gibberish, clearly illegal, or outside design/dev scope)
         
         Title: ${title}
         Description: ${description}
@@ -43,10 +44,24 @@ serve(async (req) => {
         const roleMapping: Record<string, string> = {
             'Graphic Designer': 'graphic_designer',
             'Web Designer': 'web_designer',
-            'Print Specialist': 'print_specialist'
+            'Print Specialist': 'print_specialist',
+            'Unserviceable': 'unserviceable'
         }
 
         const role = roleMapping[rawRole as keyof typeof roleMapping] || 'graphic_designer'
+
+        if (role === 'unserviceable') {
+            await supabase.from('projects').update({
+                project_type: 'other',
+                status: 'cancelled',
+                rejection_reason: 'AI classification: Request deemed unserviceable (spam, vague, or out of scope).'
+            }).eq('id', projectId)
+
+            console.log(`V2 Orchestration BLOCKED: Project ${projectId} is Unserviceable.`)
+            return new Response(JSON.stringify({ success: false, reason: 'Unserviceable' }), {
+                headers: { "Content-Type": "application/json" },
+            })
+        }
 
         // 2. Update Project Type & Trigger Worker Matching RPC (V2)
         await supabase.from('projects').update({

@@ -6,10 +6,11 @@ interface AssignmentDetailsProps {
     metadata: any;
     workers: any[];
     onReassign: (workerId: string) => void;
+    onMarkUnserviceable?: () => void;
     actionLoading?: string | null;
 }
 
-const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ project, metadata, workers, onReassign, actionLoading }) => {
+const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ project, metadata, workers, onReassign, onMarkUnserviceable, actionLoading }) => {
     const hasScore = metadata?.match_score;
     const { total, breakdown } = hasScore ? metadata.match_score : { total: 0, breakdown: {} };
     const isHighMatch = total >= 80;
@@ -73,9 +74,19 @@ const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({ project, metadata
 
             {/* Manual Assignment Tool — always visible */}
             <div className="pt-6 border-t border-border">
-                <h4 className="text-xs font-black uppercase tracking-widest text-muted mb-4">
-                    {hasScore ? 'Override Assignment' : 'Manually Assign Expert'}
-                </h4>
+                <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-muted">
+                        {hasScore ? 'Override Assignment' : 'Manually Assign Expert'}
+                    </h4>
+                    {onMarkUnserviceable && (
+                        <button
+                            onClick={onMarkUnserviceable}
+                            className="text-[10px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
+                        >
+                            Mark Unserviceable
+                        </button>
+                    )}
+                </div>
                 {workers.length === 0 ? (
                     <p className="text-sm text-muted text-center py-6">No workers found in the system.</p>
                 ) : (

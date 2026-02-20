@@ -316,6 +316,26 @@ const AdminDashboard: React.FC = () => {
                                                         metadata={projects.find(p => p.id === selectedProjectId)?.assignment_metadata}
                                                         workers={workers}
                                                         onReassign={handleForceAssign}
+                                                        onMarkUnserviceable={async () => {
+                                                            if (!selectedProjectId) return;
+                                                            if (!confirm('Are you sure? This will cancel the project and mark it as unserviceable.')) return;
+
+                                                            setActionLoading('unserviceable');
+                                                            try {
+                                                                const { error } = await supabase.from('projects').update({
+                                                                    status: 'cancelled',
+                                                                    rejection_reason: 'Admin marked as Unserviceable (Spam/Out of Scope)'
+                                                                }).eq('id', selectedProjectId);
+
+                                                                if (error) throw error;
+                                                                setAssignFeedback({ type: 'success', msg: 'Project marked as Unserviceable' });
+                                                                setTimeout(() => setSelectedProjectId(null), 1000);
+                                                            } catch (err: any) {
+                                                                setAssignFeedback({ type: 'error', msg: err.message });
+                                                            } finally {
+                                                                setActionLoading(null);
+                                                            }
+                                                        }}
                                                         actionLoading={actionLoading}
                                                     />
                                                 </div>

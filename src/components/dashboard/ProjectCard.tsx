@@ -56,8 +56,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     </span>
                 </div>
 
-                <h4 className="text-base lg:text-lg font-bold text-foreground mb-2 group-hover:text-plaiz-blue transition-colors line-clamp-1">{project.title}</h4>
-                <p className="text-xs lg:text-sm text-muted line-clamp-2 mb-4 lg:mb-6 flex-grow leading-relaxed font-medium">
+                <h4 className="text-base lg:text-lg font-bold text-foreground mb-2 group-hover:text-plaiz-blue transition-colors leading-tight">{project.title}</h4>
+                <p className="text-xs lg:text-sm text-muted line-clamp-2 group-hover:line-clamp-none transition-all duration-300 mb-4 lg:mb-6 flex-grow leading-relaxed font-medium">
                     {project.description}
                 </p>
 
