@@ -412,11 +412,21 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
 
     const handleRequestChanges = async () => {
         if (!agreement) return;
+
+        const revisionNote = window.prompt("What should the worker change in this proposal? (Optional)");
+
         try {
             // Mark agreement as revision requested
             await supabase
                 .from('agreements')
-                .update({ status: 'revision_requested', client_agreed: false })
+                .update({
+                    status: 'revision_requested',
+                    client_agreed: false,
+                    payload: {
+                        ...agreement.payload,
+                        revision_note: revisionNote || 'No specific note provided.'
+                    }
+                })
                 .eq('id', agreement.id);
 
             // Reset project to in_progress so worker can re-submit
@@ -426,12 +436,19 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                 .eq('id', projectId);
 
             // Post a system message so the worker sees what to fix
+            const content = revisionNote
+                ? `🔄 Revision Requested: "${revisionNote}"`
+                : '🔄 The client has requested revisions to your proposal. Please review their feedback and submit an updated quote.';
+
             await supabase.from('messages').insert({
                 project_id: projectId,
                 sender_id: user.id,
-                content: '🔄 The client has requested revisions to your proposal. Please review their feedback and submit an updated quote.',
+                content: content,
                 is_system_message: true,
-                payload: { type: 'revision_request' }
+                payload: {
+                    type: 'revision_request',
+                    note: revisionNote
+                }
             });
         } catch (err: any) {
             console.error('Error requesting changes:', err);
@@ -895,6 +912,28 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
             {/* Floating Pill Input - Optimized for Desktop & Mobile */}
             <div className="sticky bottom-0 pb-6 lg:pb-12 pt-6 shrink-0 z-50 bg-gradient-to-t from-background to-transparent pointer-events-none">
                 <div className="max-w-6xl mx-auto px-4 lg:px-6 pointer-events-auto">
+
+                    {/* Resubmit Proposal Prompt for Workers */}
+                    {currentUserRole === 'worker' && agreement?.status === 'revision_requested' && (
+                        <div className="mb-4 p-6 bg-plaiz-blue text-white rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-bottom-4 duration-700 shadow-[0_20px_50px_rgba(0,123,255,0.3)]">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                                    <Zap size={24} className="animate-pulse" />
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-sm uppercase tracking-widest">Update Required</h4>
+                                    <p className="text-[11px] opacity-80 font-bold max-w-xs">{agreement.payload?.revision_note || 'Client requested changes to your proposal.'}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowProposalForm(true)}
+                                className="px-8 py-3 bg-white text-plaiz-blue rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all w-full md:w-auto shadow-xl"
+                            >
+                                Re-Submit Proposal
+                            </button>
+                        </div>
+                    )}
+
                     {/* Attachment Preview Bar */}
                     {attachments.length > 0 && (
                         <div className="mb-4 p-3 lg:p-4 bg-surface/80 backdrop-blur-xl border border-border/60 rounded-[32px] flex gap-3 lg:gap-4 animate-in slide-in-from-bottom-4 duration-500 shadow-2xl">
@@ -1112,6 +1151,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                 onClose={() => setShowProposalForm(false)}
                 onSubmit={handleProposalSubmit}
                 isPrinting={project?.skill === 'printing'}
+                initialData={agreement} // Pass existing agreement for pre-filling
             />
 
             {/* Image Preview Modal */}

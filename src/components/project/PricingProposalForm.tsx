@@ -6,9 +6,10 @@ interface PricingProposalFormProps {
     onClose: () => void;
     onSubmit: (amount: number, deliverables: string, timeline: string, notes: string, cost?: number) => Promise<void>;
     isPrinting?: boolean;
+    initialData?: any; // Added for pre-filling
 }
 
-const PricingProposalForm: React.FC<PricingProposalFormProps> = ({ isOpen, onClose, onSubmit, isPrinting }) => {
+const PricingProposalForm: React.FC<PricingProposalFormProps> = ({ isOpen, onClose, onSubmit, isPrinting, initialData }) => {
     const [amount, setAmount] = useState('');
     const [cost, setCost] = useState(''); // Only for printing
     const [logisticsFee, setLogisticsFee] = useState(''); // Only for printing
@@ -16,6 +17,29 @@ const PricingProposalForm: React.FC<PricingProposalFormProps> = ({ isOpen, onClo
     const [notes, setNotes] = useState('');
     const [timeline, setTimeline] = useState('7 Days');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Effect to pre-fill form data if initialData is provided
+    React.useEffect(() => {
+        if (isOpen && initialData) {
+            setAmount(String(initialData.amount || ''));
+            setDeliverables(initialData.deliverables || '');
+            setNotes(initialData.notes || '');
+            setTimeline(initialData.timeline || '7 Days');
+
+            if (isPrinting && initialData.metadata) {
+                setCost(String(initialData.metadata.material_cost || ''));
+                setLogisticsFee(String(initialData.metadata.logistics_fee || ''));
+            }
+        } else if (isOpen && !initialData) {
+            // Reset for new proposal
+            setAmount('');
+            setCost('');
+            setLogisticsFee('');
+            setDeliverables('');
+            setNotes('');
+            setTimeline('7 Days');
+        }
+    }, [isOpen, initialData, isPrinting]);
 
     if (!isOpen) return null;
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, CreditCard, ChevronRight, Info, X, Download, Lock } from 'lucide-react';
+import { CheckCircle, XCircle, CreditCard, ChevronRight, Info, X, Download, Lock, Zap } from 'lucide-react';
 
 interface PriceProposalCardProps {
     amount: number;
@@ -17,6 +17,7 @@ export const PriceProposalCard: React.FC<PriceProposalCardProps> = ({
     amount, deposit, balance, notes, onAccept, onRequestChanges, isClient, isInBlueBubble, status
 }) => {
     const isPending = status === 'pending' || status === 'waiting_for_client';
+    const isRevision = status === 'revision_requested';
 
     return (
         <div className="my-4 w-full max-w-sm overflow-hidden rounded-[24px] bg-[#1A6CFF] border border-white/20 shadow-2xl shadow-blue-900/40 animate-in fade-in slide-in-from-bottom-2">
@@ -26,7 +27,12 @@ export const PriceProposalCard: React.FC<PriceProposalCardProps> = ({
                     <Info size={14} className="text-blue-200" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em]">Project Quote</span>
                 </div>
-                {!isPending && (
+                {isRevision ? (
+                    <div className="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Zap size={10} className="animate-pulse" />
+                        <span className="text-[9px] font-black uppercase">Revision Requested</span>
+                    </div>
+                ) : !isPending && (
                     <div className="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <CheckCircle size={10} />
                         <span className="text-[9px] font-black uppercase">Active</span>
@@ -76,7 +82,16 @@ export const PriceProposalCard: React.FC<PriceProposalCardProps> = ({
                     </div>
                 )}
 
-                {!isPending && (
+                {isRevision && (
+                    <div className="py-2 flex items-center justify-center gap-3 text-white border-t border-white/10 pt-4">
+                        <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400">
+                            <Zap size={18} className="animate-pulse" />
+                        </div>
+                        <span className="text-[11px] font-black uppercase tracking-[0.1em]">Awaiting Updated Quote...</span>
+                    </div>
+                )}
+
+                {!isPending && !isRevision && (
                     <div className="py-2 flex items-center justify-center gap-3 text-white border-t border-white/10 pt-4">
                         <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
                             <CheckCircle size={18} />
