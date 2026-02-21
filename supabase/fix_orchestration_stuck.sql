@@ -4,18 +4,23 @@
 -- 2. Unsticks currently stuck projects
 -- =============================================
 
--- 1. Improved Match Worker RPC
+-- 1. Improved Match Worker RPC (Strict Compliance)
 CREATE OR REPLACE FUNCTION public.match_worker_v2(p_role TEXT, p_project_id UUID)
 RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     v_worker_id UUID;
     v_score RECORD;
     v_role TEXT;
+    v_client_id UUID;
+    v_project_title TEXT;
 BEGIN
-    -- Normalize Role (Handle 'Graphic Designer' vs 'graphic_designer')
+    -- 0. Get Project/Client Details for notifications
+    SELECT client_id, title INTO v_client_id, v_project_title FROM projects WHERE id = p_project_id;
+
+    -- 1. Normalize Role
     v_role := LOWER(REPLACE(p_role, ' ', '_'));
 
-    -- Find Best Verified Worker
+    -- 2. Find Best VERIFIED Worker (Strict Gate)
     SELECT 
         id,
         (
@@ -29,12 +34,13 @@ BEGIN
         role = v_role::user_role_enum 
         AND verification_status = 'VERIFIED'
         AND status = 'active'
+        AND id != v_client_id -- Prevent self-assignment
     ORDER BY match_score DESC
     LIMIT 1;
 
     v_worker_id := v_score.id;
 
-    -- Update Project with Match Result
+    -- 3. Update Project with Match Result
     IF v_worker_id IS NOT NULL THEN
         UPDATE projects 
         SET 
@@ -47,13 +53,22 @@ BEGIN
                 'assigned_at', NOW()
             )
         WHERE id = p_project_id;
+
+        -- Notify Worker (Instant)
+        INSERT INTO notifications (user_id, title, message, type, project_id)
+        VALUES (v_worker_id, 'New Project Opportunity!', 'You have 1 hour to accept: "' || v_project_title || '" before it is reassigned.', 'project_assigned', p_project_id);
+
     ELSE
-        -- NO WORKER FOUND -> Set Status to NO_WORKER_AVAILABLE
+        -- 4. NO WORKER FOUND -> Set Status to NO_WORKER_AVAILABLE (Instant Fail)
         UPDATE projects 
         SET 
             status = 'NO_WORKER_AVAILABLE',
             worker_id = NULL
         WHERE id = p_project_id;
+
+        -- Notify Client (Instant Fail)
+        INSERT INTO notifications (user_id, title, message, type, project_id)
+        VALUES (v_client_id, 'No Experts Available', 'Currently, no verified ' || p_role || ' is available for "' || v_project_title || '". Please try again later.', 'matching_failed', p_project_id);
     END IF;
 
     RETURN v_worker_id;

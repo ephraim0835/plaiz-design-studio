@@ -18,7 +18,8 @@ serve(async (req) => {
         - Graphic Designer (Logos, Flyers, Branding, Social Media)
         - Web Designer (Websites, Dashboards, UI/UX)
         - Print Specialist (Banners, Business Cards, Packaging, Clothing Prints)
-        - Unserviceable (If the request is vague, spam, gibberish, clearly illegal, or outside design/dev scope)
+        - NEEDS_ADMIN (If the request is ambiguous, lacks sufficient detail to classify confidently, or requires expert human judgment)
+        - Unserviceable (If the request is clearly spam, gibberish, illegal, or completely outside design/dev scope)
         
         Title: ${title}
         Description: ${description}
@@ -38,17 +39,18 @@ serve(async (req) => {
         })
 
         const analysisData = await analysisResponse.json()
-        const rawRole = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Graphic Designer'
+        const rawRole = analysisData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'NEEDS_ADMIN'
 
         // 1.5 Map Gemini roles to db-friendly snake_case
         const roleMapping: Record<string, string> = {
             'Graphic Designer': 'graphic_designer',
             'Web Designer': 'web_designer',
             'Print Specialist': 'print_specialist',
+            'NEEDS_ADMIN': 'NEEDS_ADMIN',
             'Unserviceable': 'unserviceable'
         }
 
-        const role = roleMapping[rawRole as keyof typeof roleMapping] || 'graphic_designer'
+        const role = roleMapping[rawRole as keyof typeof roleMapping] || 'NEEDS_ADMIN'
 
         if (role === 'unserviceable') {
             await supabase.from('projects').update({
@@ -59,6 +61,32 @@ serve(async (req) => {
 
             console.log(`V2 Orchestration BLOCKED: Project ${projectId} is Unserviceable.`)
             return new Response(JSON.stringify({ success: false, reason: 'Unserviceable' }), {
+                headers: { "Content-Type": "application/json" },
+            })
+        }
+
+        if (role === 'NEEDS_ADMIN') {
+            await supabase.from('projects').update({
+                status: 'flagged',
+                rejection_reason: 'AI classification: Ambiguous request flagged for Admin Review.'
+            }).eq('id', projectId)
+
+            // Notify Admins
+            const { data: admins } = await supabase.from('profiles').select('id').eq('role', 'admin')
+            if (admins) {
+                await Promise.all(admins.map(admin =>
+                    supabase.from('notifications').insert({
+                        user_id: admin.id,
+                        title: 'New Project: Admin Review Needed',
+                        message: `Project "${title}" was flagged for manual classification.`,
+                        type: 'admin_mediation',
+                        project_id: projectId
+                    })
+                ))
+            }
+
+            console.log(`V2 Orchestration PAUSED: Project ${projectId} flagged for Admin Review.`)
+            return new Response(JSON.stringify({ success: true, status: 'flagged' }), {
                 headers: { "Content-Type": "application/json" },
             })
         }
