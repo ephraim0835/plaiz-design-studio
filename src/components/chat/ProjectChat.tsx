@@ -283,19 +283,20 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
     const isAssignedPending = project?.status === 'assigned' && currentUserRole === 'worker';
     const isChatLocked = project?.status === 'assigned' || project?.status === 'matching' || project?.status === 'NO_WORKER_AVAILABLE' || project?.status === 'cancelled';
 
-    useEffect(() => {
-        const fetchProjectData = async () => {
-            const { data: proj } = await supabase.from('projects').select('*').eq('id', projectId).single();
-            if (proj) setProject(proj);
+    const fetchProjectData = useCallback(async () => {
+        const { data: proj } = await supabase.from('projects').select('*').eq('id', projectId).single();
+        if (proj) setProject(proj);
 
-            const { data: agr } = await supabase.from('agreements')
-                .select('*')
-                .eq('project_id', projectId)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            if (agr) setAgreement(agr);
-        };
+        const { data: agr } = await supabase.from('agreements')
+            .select('*')
+            .eq('project_id', projectId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        if (agr) setAgreement(agr);
+    }, [projectId]);
+
+    useEffect(() => {
         fetchProjectData();
 
         // Subscribe to project and agreement changes
@@ -309,7 +310,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
             .subscribe();
 
         return () => { sub.unsubscribe(); };
-    }, [projectId]);
+    }, [projectId, fetchProjectData]);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -488,7 +489,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
             setShowProposalForm(false);
 
             // Refresh agreement to show updated cards
-            if (fetchProject) await fetchProject();
+            if (fetchProjectData) await fetchProjectData();
 
         } catch (err: any) {
             console.error('[Proposal] Critical Failure:', err);
