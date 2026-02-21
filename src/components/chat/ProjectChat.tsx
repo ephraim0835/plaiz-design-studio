@@ -457,24 +457,48 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
     };
 
     const handleProposalSubmit = async (amount: number, deliverables: string, timeline: string, notes: string, cost?: number) => {
+        if (!projectId || !user?.id) {
+            console.error('[Proposal] Missing required IDs:', { projectId, userId: user?.id });
+            alert('Cannot submit proposal: Missing project or user information.');
+            return;
+        }
+
         try {
+            console.log('[Proposal] Submitting:', { amount, cost, deliverables, timeline });
+
             // Calculate profit for printing
             const profitValue = cost !== undefined ? (amount - cost) : 0;
 
-            const { error } = await supabase.rpc('submit_price_proposal', {
+            const { data, error } = await supabase.rpc('submit_price_proposal', {
                 p_project_id: projectId,
                 p_worker_id: user.id,
                 p_amount: amount,
                 p_deliverables: deliverables,
                 p_timeline: timeline,
                 p_notes: notes,
-                p_profit: profitValue // New parameter for AntiGravity profit-based split
+                p_profit: profitValue
             });
-            if (error) throw error;
+
+            if (error) {
+                console.error('[Proposal] RPC Error:', error);
+                throw new Error(error.message || 'Database error occurred');
+            }
+
+            console.log('[Proposal] Success:', data);
             setShowProposalForm(false);
+
+            // Refresh agreement to show updated cards
+            if (fetchProject) await fetchProject();
+
         } catch (err: any) {
-            console.error('Error submitting proposal:', err);
-            alert('Failed to submit proposal: ' + err.message);
+            console.error('[Proposal] Critical Failure:', err);
+
+            // Handle "Failed to fetch" specially as it often means network/CORS/VPN issues
+            if (err.message === 'Failed to fetch') {
+                alert('Connection Error: Failed to reach the server. Please check your internet connection or try reloading the page.');
+            } else {
+                alert('Failed to submit proposal: ' + err.message);
+            }
         }
     };
 
