@@ -821,6 +821,16 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                                                     onApprove={handleApproveSamples}
                                                     onRequestRevision={handleRequestRevision}
                                                 />
+                                            ) : msg.payload?.type === 'revision_request' ? (
+                                                <div className="p-4 lg:p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-4 shadow-sm animate-in zoom-in-95 duration-300">
+                                                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                                                        <Zap size={20} className="animate-pulse" />
+                                                    </div>
+                                                    <div className="flex-1 space-y-1">
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/60">Revision Requested</p>
+                                                        <p className="text-sm font-bold text-amber-200 leading-relaxed italic">"{msg.payload.note || 'See notes above'}"</p>
+                                                    </div>
+                                                </div>
                                             ) : msg.is_voice_note && msg.attachment_url ? (
                                                 <div className="flex items-center gap-4 min-w-[280px] py-1">
                                                     <button
