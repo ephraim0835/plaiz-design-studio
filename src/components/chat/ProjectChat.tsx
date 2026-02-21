@@ -430,10 +430,10 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId, projectTitle }) =>
                 })
                 .eq('id', agreement.id);
 
-            // Reset project to in_progress so worker can re-submit
+            // Reset project to assigned so worker can re-submit
             await supabase
                 .from('projects')
-                .update({ status: 'in_progress' })
+                .update({ status: 'assigned' })
                 .eq('id', projectId);
 
             // Post a system message so the worker sees what to fix
