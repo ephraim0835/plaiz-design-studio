@@ -10,6 +10,35 @@ END $$;
 ALTER TABLE public.agreements DROP CONSTRAINT IF EXISTS agreements_status_check;
 ALTER TABLE public.agreements ADD CONSTRAINT agreements_status_check CHECK (status IN ('pending', 'accepted', 'rejected', 'revision_requested'));
 
+-- definitive FIX: project status constraint alignment
+-- Ensures AI Orchestrator can use 'matching' and 'NO_WORKER_AVAILABLE' without violations
+ALTER TABLE public.projects DROP CONSTRAINT IF EXISTS projects_status_check;
+ALTER TABLE public.projects ADD CONSTRAINT projects_status_check CHECK (status IN (
+    'pending',
+    'queued',
+    'matching',
+    'assigned',
+    'waiting_for_client',
+    'awaiting_down_payment',
+    'active',
+    'in_progress',
+    'work_started',
+    'review_samples',
+    'ready_for_review',
+    'review',
+    'approved',
+    'awaiting_payout',
+    'awaiting_final_payment',
+    'pending_agreement',
+    'pending_down_payment',
+    'chat_negotiation',
+    'stuck_in_negotiation',
+    'NO_WORKER_AVAILABLE',
+    'completed',
+    'cancelled',
+    'flagged'
+));
+
 -- Re-apply submit_price_proposal with fixed signature and logic
 CREATE OR REPLACE FUNCTION public.submit_price_proposal(
     p_project_id    UUID,
