@@ -1,10 +1,14 @@
 -- Add missing updated_at column to agreements table
 DO $$ 
 BEGIN 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'agreements' AND column_name = 'updated_at') THEN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'agreements' AND column_name = 'updated_at') THEN
         ALTER TABLE public.agreements ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
     END IF;
 END $$;
+
+-- Update agreements status constraint to include 'revision_requested'
+ALTER TABLE public.agreements DROP CONSTRAINT IF EXISTS agreements_status_check;
+ALTER TABLE public.agreements ADD CONSTRAINT agreements_status_check CHECK (status IN ('pending', 'accepted', 'rejected', 'revision_requested'));
 
 -- Re-apply submit_price_proposal with fixed signature and logic
 CREATE OR REPLACE FUNCTION public.submit_price_proposal(
