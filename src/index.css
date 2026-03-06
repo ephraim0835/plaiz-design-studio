@@ -1,0 +1,73 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  /* Official PLAIZ STUDIO Colors */
+  --color-plaiz: #0072FF;
+  --color-plaiz-hover: #0057CC;
+  --color-coral: #FF6B6B;
+
+  /* Core Overrides */
+  --font-sans: "Outfit", sans-serif;
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+  /* Nullify Purple/Violet to prevent accidental usage */
+  --color-purple-50: transparent;
+  --color-purple-100: transparent;
+  --color-purple-200: transparent;
+  --color-purple-300: transparent;
+  --color-purple-400: transparent;
+  --color-purple-500: transparent;
+  --color-purple-600: transparent;
+  --color-purple-700: transparent;
+  --color-purple-800: transparent;
+  --color-purple-900: transparent;
+  --color-purple-950: transparent;
+  /* Strict Theme Colors */
+  --color-slate-950: #020617;
+  /* Primary Background */
+  --color-slate-900: #020617;
+  /* Fallback alias */
+  --color-slate-800: #0F172A;
+  /* Secondary Surfaces */
+  --color-slate-700: #1E293B;
+  /* Lighter Surfaces */
+  --color-slate-50: #FFFFFF;
+  /* Primary Text */
+  --color-slate-300: #CBD5E1;
+  /* Secondary Text */
+  --color-slate-400: #94A3B8;
+  /* Muted Text */
+}
+
+@layer base {
+  body {
+    background-color: #020617;
+    color: #FFFFFF;
+    overflow-x: hidden;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.glass {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-glass);
+}
+
+.glass-dark {
+  background-color: #0F172A;
+  /* Surface Cards */
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-glass);
+}
+
+.text-gradient {
+  background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, var(--color-plaiz), var(--color-plaiz-hover));
+}

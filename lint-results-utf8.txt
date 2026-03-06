@@ -1,0 +1,28 @@
+﻿
+> temp-app@0.0.0 lint
+> eslint .
+
+
+C:\Users\Plaiz\Documents\plaiz studio website\src\components\AboutSection.jsx
+  1:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Plaiz\Documents\plaiz studio website\src\components\CTAButton.jsx
+  1:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Plaiz\Documents\plaiz studio website\src\components\Hero.jsx
+  1:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Plaiz\Documents\plaiz studio website\src\components\Navbar.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Plaiz\Documents\plaiz studio website\src\components\PortfolioGrid.jsx
+  2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Plaiz\Documents\plaiz studio website\src\pages\About.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Plaiz\Documents\plaiz studio website\src\pages\Contact.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Ô£û 7 problems (7 errors, 0 warnings)
+

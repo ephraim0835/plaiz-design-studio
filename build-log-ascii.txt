@@ -1,0 +1,155 @@
+
+> temp-app@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+node.exe : Error: Cannot 
+apply unknown utility 
+class `font-sans`. Are 
+you using CSS modules or 
+similar and missing 
+`@reference`? https://tail
+windcss.com/docs/functions
+-and-directives#reference-
+directive
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (E  
+  rror: Cannot a...renc   
+ e-directive:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+    at onInvalidCandidate 
+(C:\Users\Plaiz\Documents\
+plaiz studio website\node_
+modules\tailwindcss\dist\l
+ib.js:21:1314)
+    at Ee (C:\Users\Plaiz\
+Documents\plaiz studio web
+site\node_modules\tailwind
+css\dist\lib.js:16:37066)
+    at C:\Users\Plaiz\Docu
+ments\plaiz studio website
+\node_modules\tailwindcss\
+dist\lib.js:21:355
+    at Pr (C:\Users\Plaiz\
+Documents\plaiz studio web
+site\node_modules\tailwind
+css\dist\lib.js:3:1733)
+    at _ (C:\Users\Plaiz\D
+ocuments\plaiz studio webs
+ite\node_modules\tailwindc
+ss\dist\lib.js:3:1377)
+    at Te (C:\Users\Plaiz\
+Documents\plaiz studio web
+site\node_modules\tailwind
+css\dist\lib.js:21:172)
+    at pn (C:\Users\Plaiz\
+Documents\plaiz studio web
+site\node_modules\tailwind
+css\dist\lib.js:38:294)
+    at async dn (C:\Users\
+Plaiz\Documents\plaiz 
+studio website\node_module
+s\tailwindcss\dist\lib.js:
+38:631)
+    at async Xr (C:\Users\
+Plaiz\Documents\plaiz 
+studio website\node_module
+s\@tailwindcss\node\dist\i
+ndex.js:10:3417)
+    at async N (C:\Users\P
+laiz\Documents\plaiz 
+studio website\node_module
+s\@tailwindcss\postcss\dis
+t\index.js:10:3979)
+[32m???[39m 3 modules transformed.
+[31m???[39m Build 
+failed in 891ms
+[31merror during build:
+[31m[vite:css] [postcss] 
+tailwindcss: C:/Users/Plai
+z/Documents/plaiz studio w
+ebsite/src/index.css:1:1: 
+Cannot apply unknown 
+utility class 
+`font-sans`. Are you 
+using CSS modules or 
+similar and missing 
+`@reference`? https://tail
+windcss.com/docs/functions
+-and-directives#reference-
+directive[31m
+file: [36mC:/Users/Plaiz/
+Documents/plaiz studio web
+site/src/index.css:1:0[31
+m
+    at Input.error (C:\Use
+rs\Plaiz\Documents\plaiz 
+studio website\node_module
+s\postcss\lib\input.js:135
+:16)
+    at Root.error (C:\User
+s\Plaiz\Documents\plaiz 
+studio website\node_module
+s\postcss\lib\node.js:146:
+32)
+    at Object.Once (C:\Use
+rs\Plaiz\Documents\plaiz 
+studio website\node_module
+s\@tailwindcss\postcss\dis
+t\index.js:10:6913)
+    at async 
+LazyResult.runAsync (C:\Us
+ers\Plaiz\Documents\plaiz 
+studio website\node_module
+s\postcss\lib\lazy-result.
+js:293:11)
+    at async runPostCSS (f
+ile:///C:/Users/Plaiz/Docu
+ments/plaiz%20studio%20web
+site/node_modules/vite/dis
+t/node/chunks/config.js:30
+145:19)
+    at async 
+compilePostCSS (file:///C:
+/Users/Plaiz/Documents/pla
+iz%20studio%20website/node
+_modules/vite/dist/node/ch
+unks/config.js:30129:6)
+    at async compileCSS (f
+ile:///C:/Users/Plaiz/Docu
+ments/plaiz%20studio%20web
+site/node_modules/vite/dis
+t/node/chunks/config.js:30
+059:26)
+    at async 
+Object.handler (file:///C:
+/Users/Plaiz/Documents/pla
+iz%20studio%20website/node
+_modules/vite/dist/node/ch
+unks/config.js:29592:54)
+    at async transform (fi
+le:///C:/Users/Plaiz/Docum
+ents/plaiz%20studio%20webs
+ite/node_modules/rollup/di
+st/es/shared/node-entry.js
+:21269:16)
+    at async ModuleLoader.
+addModuleSource (file:///C
+:/Users/Plaiz/Documents/pl
+aiz%20studio%20website/nod
+e_modules/rollup/dist/es/s
+hared/node-entry.js:21497:
+36)[39m
