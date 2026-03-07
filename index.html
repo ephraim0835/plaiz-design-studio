@@ -11,6 +11,39 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&family=Outfit:wght@100..900&display=swap">
 
+  <!-- Nuclear Purge for Legacy Service Workers & Caches -->
+  <script>
+    (function () {
+      // 1. Unregister all Service Workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) {
+            registration.unregister();
+            console.log('Legacy Service Worker cleared');
+          }
+        });
+      }
+
+      // 2. Clear all Cache Storage
+      if ('caches' in window) {
+        caches.keys().then(function (names) {
+          for (let name of names) caches.delete(name);
+          console.log('Browser cache purged');
+        });
+      }
+
+      // 3. Clear LocalStorage to remove old site sessions (once)
+      const purgeKey = 'plaiz_studio_v1_purged';
+      if (!localStorage.getItem(purgeKey)) {
+        localStorage.clear();
+        sessionStorage.clear();
+        localStorage.setItem(purgeKey, 'true');
+        console.log('Local data reset for new version');
+        window.location.reload(); // Force a fresh start
+      }
+    })();
+  </script>
+
 </head>
 
 <body>
