@@ -12,6 +12,7 @@ const Admin = () => {
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
     const [activeTab, setActiveTab] = useState('portfolio'); // 'portfolio', 'testimonials', 'security'
+    const [securityData, setSecurityData] = useState({ failedLogins: 0, successLogins: 0, failedAPI: 0, uploads: [] });
     const [headerStatus, setHeaderStatus] = useState({ csp: "Checking...", xFrameOptions: "Checking...", xContentTypeOptions: "Checking..." });
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // { show, message, type: 'success' | 'error' }
 
@@ -627,8 +628,8 @@ const Admin = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
                         className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-xl ${toast.type === 'success'
-                                ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                                : 'bg-red-500/20 border-red-500/50 text-red-100'
+                            ? 'bg-green-500/20 border-green-500/50 text-green-400'
+                            : 'bg-red-500/20 border-red-500/50 text-red-100'
                             }`}
                     >
                         {toast.type === 'success' ? <Save size={20} /> : <AlertCircle size={20} />}
