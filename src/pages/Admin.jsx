@@ -106,24 +106,35 @@ const Admin = () => {
     const handleImageUpload = (id, files) => {
         if (!files || files.length === 0) return;
 
-        Array.from(files).forEach(file => {
+        const filesArray = Array.from(files);
+        let loadedCount = 0;
+        const newPreviews = [];
+        const newFileObjects = [];
+
+        filesArray.forEach(file => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setProjects(prevProjects => prevProjects.map(p => {
-                    if (p.id === id) {
-                        // Store File objects for Supabase upload + base64 for preview
-                        const newFiles = p.newFiles ? [...p.newFiles, file] : [file];
-                        const previewImages = p.previewImages ? [...p.previewImages, reader.result] : [reader.result];
+                newPreviews.push(reader.result);
+                newFileObjects.push(file);
+                loadedCount++;
 
-                        let coverImage = p.image;
-                        if (!coverImage && previewImages.length === 1 && (!p.images || p.images.length === 0)) {
-                            coverImage = reader.result;
+                if (loadedCount === filesArray.length) {
+                    setProjects(prevProjects => prevProjects.map(p => {
+                        if (p.id === id) {
+                            const updatedPreviews = [...(p.previewImages || []), ...newPreviews];
+                            const updatedFiles = [...(p.newFiles || []), ...newFileObjects];
+
+                            // Set cover if none exists
+                            let coverImage = p.image;
+                            if (!coverImage && updatedPreviews.length > 0) {
+                                coverImage = updatedPreviews[0];
+                            }
+
+                            return { ...p, previewImages: updatedPreviews, newFiles: updatedFiles, image: coverImage };
                         }
-
-                        return { ...p, newFiles, previewImages, image: coverImage };
-                    }
-                    return p;
-                }));
+                        return p;
+                    }));
+                }
             };
             reader.readAsDataURL(file);
         });
@@ -405,6 +416,20 @@ const Admin = () => {
                                                     </button>
                                                 </div>
                                             ))}
+                                            {project.previewImages && project.previewImages.map((imgUrl, idx) => (
+                                                <div key={`preview-${idx}`} className={`relative group/thumb border-2 border-dashed border-plaiz/30 rounded-xl overflow-hidden aspect-square bg-[#020617] ${project.image === imgUrl ? 'ring-2 ring-plaiz' : ''}`}>
+                                                    <img src={imgUrl} alt="" className="w-full h-full object-cover opacity-50" />
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <span className="text-[8px] bg-plaiz text-white px-1 rounded">PREVIEW</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemoveImage(project.id, idx, true)}
+                                                        className="absolute top-1 right-1 bg-red-500/80 text-white w-6 h-6 rounded-md flex items-center justify-center"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
                                             <label className="relative aspect-square rounded-xl overflow-hidden bg-[#020617] border-2 border-dashed border-white/10 hover:border-plaiz/50 transition-colors cursor-pointer flex flex-col items-center justify-center text-slate-500 hover:text-plaiz">
                                                 <Plus size={24} />
                                                 <input type="file" multiple className="hidden" onChange={(e) => handleImageUpload(project.id, e.target.files)} />
@@ -478,6 +503,22 @@ const Admin = () => {
                                     >
                                         <Trash2 size={16} />
                                     </button>
+
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <input
+                                            value={t.name}
+                                            onChange={e => setTestimonials(testimonials.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))}
+                                            className="bg-[#020617] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-plaiz outline-none"
+                                            placeholder="Client Name"
+                                        />
+                                        <input
+                                            value={t.role}
+                                            onChange={e => setTestimonials(testimonials.map(x => x.id === t.id ? { ...x, role: e.target.value } : x))}
+                                            className="bg-[#020617] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-plaiz outline-none"
+                                            placeholder="Client Role / Company"
+                                        />
+                                    </div>
+
                                     <div className="flex items-center gap-4 mb-4">
                                         <div className="flex-1 flex gap-2 items-center bg-[#020617] border border-white/10 rounded-xl px-4 py-2">
                                             <Star size={16} className="text-yellow-400" />
