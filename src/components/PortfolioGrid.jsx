@@ -27,26 +27,37 @@ const SkeletonCard = () => (
     </div>
 );
 
-// ─── Lazy image with blur-up reveal ──────────────────────────────────────────
-const LazyImage = ({ src, alt, className, onError }) => {
+// ─── Lazy image with blur-up reveal + fallback chain ────────────────────────
+const LazyImage = ({ src, originalSrc, alt, className, onError }) => {
     const [loaded, setLoaded] = useState(false);
+    const [activeSrc, setActiveSrc] = useState(src);
+    const [triedOriginal, setTriedOriginal] = useState(false);
+
+    const handleError = (e) => {
+        // Step 1: If transform URL failed, try the original Supabase URL
+        if (!triedOriginal && originalSrc && activeSrc !== originalSrc) {
+            setTriedOriginal(true);
+            setActiveSrc(originalSrc);
+            return;
+        }
+        // Step 2: If original also fails, show placeholder
+        setLoaded(true);
+        if (onError) onError(e);
+    };
+
     return (
         <div className="relative w-full overflow-hidden">
-            {/* Shimmer shown until image loads */}
             {!loaded && (
                 <div className="absolute inset-0 bg-slate-800/60 animate-pulse" />
             )}
             <img
-                src={src}
+                src={activeSrc}
                 alt={alt}
                 loading="lazy"
                 decoding="async"
                 className={`${className} transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
                 onLoad={() => setLoaded(true)}
-                onError={(e) => {
-                    setLoaded(true);
-                    if (onError) onError(e);
-                }}
+                onError={handleError}
             />
         </div>
     );
@@ -158,9 +169,10 @@ const PortfolioGrid = () => {
                                     onClick={() => { setSelectedImage(project); setCurrentImageIndex(0); }}
                                 >
                                     <div className="w-full overflow-hidden bg-slate-800/20">
-                                        {/* Serve a compressed thumbnail (600px wide WebP) for the grid */}
+                                        {/* Serve a compressed thumbnail (600px wide WebP) for the grid, with fallback to original */}
                                         <LazyImage
                                             src={thumbUrl(project.image, 600, 75)}
+                                            originalSrc={project.image}
                                             alt={project.title}
                                             className="w-full h-auto object-contain block transition-transform duration-700 group-hover:scale-105"
                                             onError={(e) => {
