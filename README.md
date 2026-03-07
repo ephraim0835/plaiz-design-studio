@@ -1,16 +1,26 @@
-# React + Vite
+# PLAIZ STUDIO 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Premium Design & Branding Studio. Build with React, Vite, Tailwind CSS, and powered by Supabase.
 
-Currently, two official plugins are available:
+## 🛠️ Tech Stack
+- **Frontend**: React (Vite)
+- **Styling**: Tailwind CSS + Framer Motion
+- **Backend**: Supabase (Database & Storage)
+- **Deployment**: Vercel
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Deployment Info
+The site is configured for automatic deployment on Vercel via GitHub. 
 
-## React Compiler
+### Environment Variables
+Ensure the following are set in the deployment dashboard:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `VITE_ADMIN_PASSWORD`
+- `VITE_ADMIN_TOKEN`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🧹 Maintenance
+- **Portfolio**: Managed via the `/admin` dashboard.
+- **Testimonials**: Managed via the `/admin` dashboard.
+- **Images**: Automatically uploaded to Supabase Storage.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+© 2026 PLAIZ STUDIO. All rights reserved.
