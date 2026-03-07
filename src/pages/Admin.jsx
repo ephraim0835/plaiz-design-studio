@@ -8,7 +8,7 @@ const Admin = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [statusText, setStatusText] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('plaiz_auth') === 'true');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
     const [activeTab, setActiveTab] = useState('portfolio'); // 'portfolio', 'testimonials', 'security'
@@ -52,9 +52,9 @@ const Admin = () => {
                     const successLogins = logs.filter(l => l.type === 'login_success').length;
                     const failedAPI = logs.filter(l => l.type === 'api_fail').length;
                     const uploads = logs.filter(l => l.type.startsWith('upload_')).map(l => ({
-                        filename: l.details?.filename || 'unknown',
-                        status: l.type === 'upload_accept' ? 'accepted' : 'rejected',
-                        date: l.timestamp
+                        ...l,
+                        filename: l.details?.filename || l.details?.reason || 'unknown',
+                        status: l.type === 'upload_accept' ? 'accepted' : 'rejected'
                     }));
                     setSecurityData({ failedLogins, successLogins, failedAPI, uploads });
                 }
@@ -300,6 +300,7 @@ const Admin = () => {
                                     type: 'login_success',
                                     details: { ip: 'authorized' }
                                 }]).then(() => { });
+                                sessionStorage.setItem('plaiz_auth', 'true');
                             } else {
                                 setLoginError('Incorrect password. Please try again.');
                                 // Report failed login to Supabase
@@ -339,7 +340,7 @@ const Admin = () => {
 
     return (
         <div className="pt-32 pb-24 min-h-screen bg-[#020617]">
-            <div className="max-w-5xl mx-auto px-6">
+            <div id="admin-panel" className="max-w-5xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
                     <div>
                         <h1 className="text-4xl font-bold text-white mb-2">Studio Dashboard</h1>
@@ -596,7 +597,7 @@ const Admin = () => {
                         <div className="bg-[#0F172A] border border-white/10 rounded-3xl p-8">
                             <h2 className="text-2xl font-bold text-white mb-6">Recent Upload Activity</h2>
                             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                                {securityData.uploads.length === 0 ? (
+                                {!securityData.uploads || securityData.uploads.length === 0 ? (
                                     <p className="text-slate-500 italic">No recent events logged.</p>
                                 ) : (
                                     securityData.uploads.map((log, idx) => (
@@ -604,8 +605,8 @@ const Admin = () => {
                                             <div className="flex items-center gap-4">
                                                 <div className={`w-2 h-2 rounded-full ${log.type === 'upload_accept' ? 'bg-green-400' : 'bg-red-400'}`} />
                                                 <div>
-                                                    <p className="text-white text-sm font-medium">{log.filename || log.reason}</p>
-                                                    <p className="text-slate-500 text-[10px]">{new Date(log.timestamp).toLocaleString()} • {log.size || 'N/A'}</p>
+                                                    <p className="text-white text-sm font-medium">{log.filename || 'Unknown Object'}</p>
+                                                    <p className="text-slate-500 text-[10px]">{log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'} • {log.details?.size || 'N/A'}</p>
                                                 </div>
                                             </div>
                                             <span className={`text-[10px] px-2 py-1 rounded-full ${log.type === 'upload_accept' ? 'bg-green-400/10 text-green-400' : 'bg-red-400/10 text-red-400'}`}>
