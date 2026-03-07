@@ -12,8 +12,8 @@ const Admin = () => {
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
     const [activeTab, setActiveTab] = useState('portfolio'); // 'portfolio', 'testimonials', 'security'
-    const [securityData, setSecurityData] = useState({ failedLogins: 0, failedAPI: 0, uploads: [] });
     const [headerStatus, setHeaderStatus] = useState({ csp: "Checking...", xFrameOptions: "Checking...", xContentTypeOptions: "Checking..." });
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // { show, message, type: 'success' | 'error' }
 
     const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN || 'plaiz_dev_sec_2026';
     const TEST_ACCESS_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'plaiz_studio_2026';
@@ -237,22 +237,21 @@ const Admin = () => {
 
             if (error) throw error;
 
-            setStatusText('Saved successfully!');
             // Reload from source to be safe
             const { data } = await supabase.from('portfolio').select('*').order('id', { ascending: false });
             setProjects(data || []);
+            setToast({ show: true, message: 'Projects saved successfully!', type: 'success' });
 
         } catch (err) {
             console.error(err);
-            setStatusText('Error saving: ' + (err.message || 'Unknown error'));
+            setToast({ show: true, message: 'Error saving: ' + (err.message || 'Unknown error'), type: 'error' });
         }
         setSaving(false);
-        setTimeout(() => setStatusText(''), 3000);
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 5000);
     };
 
     const handleTSave = async () => {
         setTSaving(true);
-        setTStatus('Saving Testimonials...');
         try {
             const { error } = await supabase
                 .from('testimonials')
@@ -260,15 +259,15 @@ const Admin = () => {
 
             if (error) throw error;
 
-            setTStatus('Saved successfully!');
             const { data } = await supabase.from('testimonials').select('*').order('id', { ascending: false });
             setTestimonials(data || []);
+            setToast({ show: true, message: 'Testimonials saved successfully!', type: 'success' });
         } catch (err) {
             console.error(err);
-            setTStatus('Error: ' + err.message);
+            setToast({ show: true, message: 'Error saving testimonials: ' + err.message, type: 'error' });
         }
         setTSaving(false);
-        setTimeout(() => setTStatus(''), 3000);
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 5000);
     };
 
 
@@ -407,7 +406,15 @@ const Admin = () => {
                                         <div className="grid grid-cols-2 gap-3 mb-3">
                                             {project.images && project.images.map((imgUrl, idx) => (
                                                 <div key={`saved-${idx}`} className={`relative group/thumb border rounded-xl overflow-hidden aspect-square bg-[#020617] ${project.image === imgUrl ? 'border-plaiz ring-1 ring-plaiz' : 'border-white/10'}`}>
-                                                    <img src={imgUrl} alt="" className="w-full h-full object-cover" />
+                                                    <img
+                                                        src={imgUrl}
+                                                        alt=""
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.target.src = 'https://via.placeholder.com/200?text=MISSING+IMAGE';
+                                                            e.target.className = 'w-full h-full object-cover opacity-20';
+                                                        }}
+                                                    />
                                                     <button
                                                         onClick={() => handleRemoveImage(project.id, idx, false)}
                                                         className="absolute top-1 right-1 bg-red-500/80 text-white w-6 h-6 rounded-md opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center"
@@ -611,6 +618,27 @@ const Admin = () => {
                     </div>
                 )}
             </div>
+
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast.show && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-xl ${toast.type === 'success'
+                                ? 'bg-green-500/20 border-green-500/50 text-green-400'
+                                : 'bg-red-500/20 border-red-500/50 text-red-100'
+                            }`}
+                    >
+                        {toast.type === 'success' ? <Save size={20} /> : <AlertCircle size={20} />}
+                        <span className="font-medium">{toast.message}</span>
+                        <button onClick={() => setToast({ ...toast, show: false })} className="ml-2 hover:opacity-70">
+                            <X size={16} />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

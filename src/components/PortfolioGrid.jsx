@@ -100,6 +100,10 @@ const PortfolioGrid = () => {
                                         loading="lazy"
                                         decoding="async"
                                         className="w-full h-auto object-contain block transition-transform duration-700 group-hover:scale-105"
+                                        onError={(e) => {
+                                            e.target.src = 'https://via.placeholder.com/800x600?text=IMAGE+PENDING';
+                                            e.target.className = 'w-full h-auto object-contain block opacity-10';
+                                        }}
                                     />
                                 </div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -164,7 +168,11 @@ const PortfolioGrid = () => {
                                                     key={currentImageIndex}
                                                     src={imageList[currentImageIndex]}
                                                     alt={`${selectedImage.title} - image ${currentImageIndex + 1}`}
-                                                    className="flex-1 min-w-0 max-h-[60vh] w-full object-contain rounded-xl shadow-2xl"
+                                                    className="flex-1 min-w-0 max-h-[60vh] w-full object-contain rounded-xl shadow-2xl transition-opacity duration-300"
+                                                    onError={(e) => {
+                                                        e.target.src = 'https://via.placeholder.com/1200x800?text=IMAGE+PENDING';
+                                                        e.target.className = 'flex-1 min-w-0 max-h-[60vh] w-full object-contain rounded-xl opacity-20';
+                                                    }}
                                                 />
 
                                                 <button
@@ -181,7 +189,11 @@ const PortfolioGrid = () => {
                                             <img
                                                 src={imageList[0]}
                                                 alt={selectedImage.title}
-                                                className="max-h-[60vh] w-full object-contain rounded-xl shadow-2xl mx-auto block"
+                                                className="max-h-[60vh] w-full object-contain rounded-xl shadow-2xl mx-auto block transition-opacity duration-300"
+                                                onError={(e) => {
+                                                    e.target.src = 'https://via.placeholder.com/1200x800?text=IMAGE+PENDING';
+                                                    e.target.className = 'max-h-[60vh] w-full object-contain rounded-xl opacity-20 mx-auto block';
+                                                }}
                                             />
                                         )}
                                     </div>
