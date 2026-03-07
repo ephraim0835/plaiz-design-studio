@@ -23,6 +23,8 @@ const Admin = () => {
     const [testimonials, setTestimonials] = useState([]);
     const [tSaving, setTSaving] = useState(false);
     const [tStatus, setTStatus] = useState('');
+    const [deletedTestimonialIds, setDeletedTestimonialIds] = useState([]);
+    const [deletedProjectIds, setDeletedProjectIds] = useState([]);
 
     const categories = ['Logos', 'Branding', 'Flyers', 'Packaging', 'Social Media Post', 'Cards', 'Mockups'];
 
@@ -97,6 +99,10 @@ const Admin = () => {
     const handleRemove = (id) => {
         if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
             setProjects(projects.filter(p => p.id !== id));
+            // Track for deletion on save (only real DB rows have numeric IDs)
+            if (typeof id === 'number') {
+                setDeletedProjectIds(prev => [...prev, id]);
+            }
         }
     };
 
@@ -231,7 +237,17 @@ const Admin = () => {
                 };
             }));
 
-            // Upsert all data to Supabase
+            // Delete any projects the user removed locally
+            if (deletedProjectIds.length > 0) {
+                const { error: delErr } = await supabase
+                    .from('portfolio')
+                    .delete()
+                    .in('id', deletedProjectIds);
+                if (delErr) console.error('Delete error:', delErr);
+                else setDeletedProjectIds([]);
+            }
+
+            // Upsert all remaining projects to Supabase
             const { error } = await supabase
                 .from('portfolio')
                 .upsert(updatedProjects);
@@ -254,14 +270,27 @@ const Admin = () => {
     const handleTSave = async () => {
         setTSaving(true);
         try {
-            const { error } = await supabase
-                .from('testimonials')
-                .upsert(testimonials);
+            // Delete testimonials removed locally
+            if (deletedTestimonialIds.length > 0) {
+                const { error: delErr } = await supabase
+                    .from('testimonials')
+                    .delete()
+                    .in('id', deletedTestimonialIds);
+                if (delErr) console.error('Testimonial delete error:', delErr);
+                else setDeletedTestimonialIds([]);
+            }
 
-            if (error) throw error;
+            // Upsert remaining testimonials
+            if (testimonials.length > 0) {
+                const { error } = await supabase
+                    .from('testimonials')
+                    .upsert(testimonials);
+                if (error) throw error;
+            }
 
             const { data } = await supabase.from('testimonials').select('*').order('id', { ascending: false });
             setTestimonials(data || []);
+            setDeletedTestimonialIds([]);
             setToast({ show: true, message: 'Testimonials saved successfully!', type: 'success' });
         } catch (err) {
             console.error(err);
@@ -507,7 +536,13 @@ const Admin = () => {
                             {testimonials.map((t) => (
                                 <motion.div key={t.id} className="bg-[#0F172A] border border-white/10 rounded-2xl p-6 relative">
                                     <button
-                                        onClick={() => setTestimonials(testimonials.filter(x => x.id !== t.id))}
+                                        onClick={() => {
+                                            setTestimonials(testimonials.filter(x => x.id !== t.id));
+                                            // Track for deletion on save
+                                            if (t.id && typeof t.id === 'number') {
+                                                setDeletedTestimonialIds(prev => [...prev, t.id]);
+                                            }
+                                        }}
                                         className="absolute top-4 right-4 text-slate-500 hover:text-red-400"
                                     >
                                         <Trash2 size={16} />
