@@ -253,16 +253,6 @@ const Admin = () => {
         setTimeout(() => setTStatus(''), 3000);
     };
 
-    if (!import.meta.env.DEV) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white">
-                <div className="text-center">
-                    <h1 className="text-3xl font-bold mb-4">Dashboard Unavailable</h1>
-                    <p className="text-slate-400">The admin dashboard is only accessible in local development mode.</p>
-                </div>
-            </div>
-        );
-    }
 
     if (loading) return <div className="min-h-screen pt-32 text-center text-white">Loading Dashboard...</div>;
 
