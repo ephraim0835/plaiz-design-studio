@@ -93,10 +93,12 @@ const PortfolioGrid = () => {
                                     setCurrentImageIndex(0);
                                 }}
                             >
-                                <div className="w-full overflow-hidden">
+                                <div className="w-full overflow-hidden bg-slate-800/20">
                                     <img
                                         src={project.image}
                                         alt={project.title}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="w-full h-auto object-contain block transition-transform duration-700 group-hover:scale-105"
                                     />
                                 </div>

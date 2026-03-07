@@ -14,48 +14,6 @@
   <meta name="theme-color" content="#020617" />
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&family=Outfit:wght@100..900&display=swap">
-
-  <!-- Nuclear Purge for Legacy Service Workers & Caches -->
-  <script>
-    (function () {
-      const purgeKey = 'plaiz_studio_v3_stable';
-      if (localStorage.getItem(purgeKey)) return;
-
-      // 1. Unregister all Service Workers
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-          for (let registration of registrations) {
-            registration.unregister();
-            console.log('Legacy Service Worker cleared');
-          }
-        });
-      }
-
-      // 2. Clear all Cache Storage
-      if ('caches' in window) {
-        caches.keys().then(function (names) {
-          for (let name of names) caches.delete(name);
-          console.log('Browser cache purged');
-        });
-      }
-
-      // 3. Clear Storage & Flag Success
-      localStorage.clear();
-      sessionStorage.clear();
-      localStorage.setItem(purgeKey, 'true');
-      console.log('Local data reset for new version');
-
-      // 4. Force Fetch Kill-Scripts
-      const swPaths = ['/sw.js', '/service-worker.js', '/workbox-sw.js'];
-      swPaths.forEach(path => {
-        fetch(path, { cache: 'reload', mode: 'no-cors' }).catch(() => { });
-      });
-
-      // 5. Final Reload to apply changes (only once)
-      setTimeout(() => window.location.reload(), 500);
-    })();
-  </script>
-
 </head>
 
 <body>

@@ -48,13 +48,14 @@ const Admin = () => {
 
                 if (!logsError && logs) {
                     const failedLogins = logs.filter(l => l.type === 'login_fail').length;
+                    const successLogins = logs.filter(l => l.type === 'login_success').length;
                     const failedAPI = logs.filter(l => l.type === 'api_fail').length;
                     const uploads = logs.filter(l => l.type.startsWith('upload_')).map(l => ({
                         filename: l.details?.filename || 'unknown',
                         status: l.type === 'upload_accept' ? 'accepted' : 'rejected',
                         date: l.timestamp
                     }));
-                    setSecurityData({ failedLogins, failedAPI, uploads });
+                    setSecurityData({ failedLogins, successLogins, failedAPI, uploads });
                 }
 
                 // Header status check (simplified for cloud)
@@ -175,9 +176,15 @@ const Admin = () => {
 
                         const { error: uploadError } = await supabase.storage
                             .from('portfolio-assets')
-                            .upload(filePath, file);
+                            .upload(filePath, file, {
+                                cacheControl: '3600',
+                                upsert: false
+                            });
 
-                        if (uploadError) throw uploadError;
+                        if (uploadError) {
+                            console.error('Upload Error:', uploadError);
+                            throw new Error(`Upload Failed: ${uploadError.message}. Make sure the "portfolio-assets" bucket exists and is set to public.`);
+                        }
 
                         const { data: { publicUrl } } = supabase.storage
                             .from('portfolio-assets')
@@ -277,6 +284,11 @@ const Admin = () => {
                             e.preventDefault();
                             if (password === TEST_ACCESS_PASS) {
                                 setIsAuthenticated(true);
+                                // Report successful login to Supabase
+                                supabase.from('security_logs').insert([{
+                                    type: 'login_success',
+                                    details: { ip: 'authorized' }
+                                }]).then(() => { });
                             } else {
                                 setLoginError('Incorrect password. Please try again.');
                                 // Report failed login to Supabase
@@ -466,19 +478,25 @@ const Admin = () => {
                                     >
                                         <Trash2 size={16} />
                                     </button>
-                                    <div className="grid grid-cols-2 gap-4 mb-4">
-                                        <input
-                                            value={t.name}
-                                            onChange={e => setTestimonials(testimonials.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))}
-                                            className="bg-[#020617] border border-white/10 rounded-xl px-4 py-2 text-white"
-                                            placeholder="Name"
-                                        />
-                                        <input
-                                            value={t.role}
-                                            onChange={e => setTestimonials(testimonials.map(x => x.id === t.id ? { ...x, role: e.target.value } : x))}
-                                            className="bg-[#020617] border border-white/10 rounded-xl px-4 py-2 text-white"
-                                            placeholder="Role"
-                                        />
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="flex-1 flex gap-2 items-center bg-[#020617] border border-white/10 rounded-xl px-4 py-2">
+                                            <Star size={16} className="text-yellow-400" />
+                                            <select
+                                                value={t.stars || 5}
+                                                onChange={e => setTestimonials(testimonials.map(x => x.id === t.id ? { ...x, stars: parseInt(e.target.value) } : x))}
+                                                className="bg-transparent text-white outline-none w-full"
+                                            >
+                                                {[5, 4, 3, 2, 1].map(s => <option key={s} value={s}>{s} Stars</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-slate-400 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={t.published !== false}
+                                                onChange={e => setTestimonials(testimonials.map(x => x.id === t.id ? { ...x, published: e.target.checked } : x))}
+                                                className="accent-plaiz"
+                                            /> Public
+                                        </div>
                                     </div>
                                     <textarea
                                         value={t.review}
@@ -496,8 +514,12 @@ const Admin = () => {
                     <div className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div className="bg-[#0F172A] border border-white/10 p-6 rounded-3xl">
-                                <p className="text-slate-400 text-sm mb-1">Failed Logins</p>
-                                <p className="text-3xl font-bold text-red-400">{securityData.failedLogins}</p>
+                                <p className="text-slate-400 text-sm mb-1">Total Logins</p>
+                                <p className="text-3xl font-bold text-green-400">{securityData.successLogins + securityData.failedLogins}</p>
+                                <div className="flex gap-2 text-[10px] mt-2">
+                                    <span className="text-green-400">Success: {securityData.successLogins}</span>
+                                    <span className="text-red-400">Failed: {securityData.failedLogins}</span>
+                                </div>
                             </div>
                             <div className="bg-[#0F172A] border border-white/10 p-6 rounded-3xl">
                                 <p className="text-slate-400 text-sm mb-1">Unauthorized API</p>
