@@ -18,6 +18,9 @@
   <!-- Nuclear Purge for Legacy Service Workers & Caches -->
   <script>
     (function () {
+      const purgeKey = 'plaiz_studio_v3_stable';
+      if (localStorage.getItem(purgeKey)) return;
+
       // 1. Unregister all Service Workers
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function (registrations) {
@@ -36,21 +39,20 @@
         });
       }
 
-      // 3. Clear LocalStorage to remove old site sessions (once)
-      const purgeKey = 'plaiz_studio_v2_purged';
-      if (!localStorage.getItem(purgeKey)) {
-        localStorage.clear();
-        sessionStorage.clear();
-        localStorage.setItem(purgeKey, 'true');
-        console.log('Local data reset for new version');
-        window.location.reload(); // Force a fresh start
-      }
+      // 3. Clear Storage & Flag Success
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem(purgeKey, 'true');
+      console.log('Local data reset for new version');
 
-      // 4. Force Fetch Kill-Scripts to bypass SW interception
+      // 4. Force Fetch Kill-Scripts
       const swPaths = ['/sw.js', '/service-worker.js', '/workbox-sw.js'];
       swPaths.forEach(path => {
         fetch(path, { cache: 'reload', mode: 'no-cors' }).catch(() => { });
       });
+
+      // 5. Final Reload to apply changes (only once)
+      setTimeout(() => window.location.reload(), 500);
     })();
   </script>
 
