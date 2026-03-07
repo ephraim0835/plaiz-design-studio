@@ -1,8 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+// ─── Supabase transform: serve fast thumbnails for the grid ─────────────────
+const thumbUrl = (url, width = 600, quality = 75) => {
+    if (!url || !url.includes('supabase.co')) return url; // passthrough for non-supabase URLs
+    try {
+        const u = new URL(url);
+        // Supabase image transformation endpoint
+        const base = u.origin + u.pathname.replace('/object/public/', '/render/image/public/');
+        return `${base}?width=${width}&quality=${quality}&format=webp`;
+    } catch {
+        return url;
+    }
+};
+
+// ─── Skeleton shimmer card ────────────────────────────────────────────────────
+const SkeletonCard = () => (
+    <div className="rounded-xl overflow-hidden bg-[#0F172A] border border-white/5 animate-pulse">
+        <div className="w-full aspect-[4/3] bg-slate-800/60" />
+        <div className="p-4 space-y-2">
+            <div className="h-3 bg-slate-700/60 rounded w-1/3" />
+            <div className="h-4 bg-slate-700/40 rounded w-2/3" />
+        </div>
+    </div>
+);
+
+// ─── Lazy image with blur-up reveal ──────────────────────────────────────────
+const LazyImage = ({ src, alt, className, onError }) => {
+    const [loaded, setLoaded] = useState(false);
+    return (
+        <div className="relative w-full overflow-hidden">
+            {/* Shimmer shown until image loads */}
+            {!loaded && (
+                <div className="absolute inset-0 bg-slate-800/60 animate-pulse" />
+            )}
+            <img
+                src={src}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+                className={`${className} transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+                onLoad={() => setLoaded(true)}
+                onError={(e) => {
+                    setLoaded(true);
+                    if (onError) onError(e);
+                }}
+            />
+        </div>
+    );
+};
+
+// ─── Main component ───────────────────────────────────────────────────────────
 const PortfolioGrid = () => {
     const [activeFilter, setActiveFilter] = useState('All');
     const [selectedImage, setSelectedImage] = useState(null);
@@ -25,7 +75,6 @@ const PortfolioGrid = () => {
             }
             setLoading(false);
         };
-
         fetchProjects();
     }, []);
 
@@ -35,16 +84,30 @@ const PortfolioGrid = () => {
         } else {
             document.body.style.overflow = '';
         }
-        return () => {
-            document.body.style.overflow = '';
-        };
+        return () => { document.body.style.overflow = ''; };
     }, [selectedImage]);
 
-    const filters = ['All', 'Logos', 'Branding', 'Flyers', 'Packaging', 'Social Media Post', 'Cards', 'Mockups'];
+    // Keyboard navigation in lightbox
+    const handleKey = useCallback((e) => {
+        if (!selectedImage) return;
+        const imageList = getImageList(selectedImage);
+        if (e.key === 'Escape') setSelectedImage(null);
+        if (e.key === 'ArrowRight') setCurrentImageIndex(i => (i + 1) % imageList.length);
+        if (e.key === 'ArrowLeft') setCurrentImageIndex(i => (i === 0 ? imageList.length - 1 : i - 1));
+    }, [selectedImage]);
 
-    const filteredProjects = activeFilter === 'All'
-        ? projects
-        : projects.filter(p => p.category === activeFilter);
+    useEffect(() => {
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [handleKey]);
+
+    const getImageList = (project) =>
+        project.images && project.images.length > 0
+            ? project.images
+            : (project.image ? [project.image] : []);
+
+    const filters = ['All', 'Logos', 'Branding', 'Flyers', 'Packaging', 'Social Media Post', 'Cards', 'Mockups'];
+    const filteredProjects = activeFilter === 'All' ? projects : projects.filter(p => p.category === activeFilter);
 
     return (
         <section className="py-24" id="portfolio">
@@ -56,7 +119,6 @@ const PortfolioGrid = () => {
                         <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Our Work</h2>
                         <p className="text-slate-400 text-lg max-w-lg">Logos, flyers, packaging, social media graphics, and more — designed for brands that want to stand out.</p>
                     </div>
-
                     <div className="flex flex-wrap gap-2">
                         {filters.map(filter => (
                             <button
@@ -73,62 +135,66 @@ const PortfolioGrid = () => {
                     </div>
                 </div>
 
-                {/* Grid */}
-                <motion.div
-                    layout
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                >
-                    <AnimatePresence>
-                        {filteredProjects.map((project) => (
-                            <motion.div
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.3 }}
-                                key={project.id}
-                                className="group relative rounded-xl overflow-hidden cursor-pointer bg-[#0F172A] border border-white/5 hover:border-white/20 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300"
-                                onClick={() => {
-                                    setSelectedImage(project);
-                                    setCurrentImageIndex(0);
-                                }}
-                            >
-                                <div className="w-full overflow-hidden bg-slate-800/20">
-                                    <img
-                                        src={project.image}
-                                        alt={project.title}
-                                        loading="lazy"
-                                        decoding="async"
-                                        className="w-full h-auto object-contain block transition-transform duration-700 group-hover:scale-105"
-                                        onError={(e) => {
-                                            e.target.src = 'https://via.placeholder.com/800x600?text=IMAGE+PENDING';
-                                            e.target.className = 'w-full h-auto object-contain block opacity-10';
-                                        }}
-                                    />
-                                </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {/* Skeleton Grid */}
+                {loading && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                    </div>
+                )}
 
-                                <div className="absolute bottom-0 left-0 w-full p-8 translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <span className="text-plaiz text-sm font-bold uppercase tracking-wider mb-2 block">{project.category}</span>
-                                    <h3 className="text-2xl font-bold text-white mb-4">{project.title}</h3>
-                                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-                                        <ZoomIn size={18} />
+                {/* Portfolio Grid */}
+                {!loading && (
+                    <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <AnimatePresence>
+                            {filteredProjects.map((project) => (
+                                <motion.div
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    transition={{ duration: 0.3 }}
+                                    key={project.id}
+                                    className="group relative rounded-xl overflow-hidden cursor-pointer bg-[#0F172A] border border-white/5 hover:border-white/20 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300"
+                                    onClick={() => { setSelectedImage(project); setCurrentImageIndex(0); }}
+                                >
+                                    <div className="w-full overflow-hidden bg-slate-800/20">
+                                        {/* Serve a compressed thumbnail (600px wide WebP) for the grid */}
+                                        <LazyImage
+                                            src={thumbUrl(project.image, 600, 75)}
+                                            alt={project.title}
+                                            className="w-full h-auto object-contain block transition-transform duration-700 group-hover:scale-105"
+                                            onError={(e) => {
+                                                e.target.src = 'https://via.placeholder.com/600x450?text=IMAGE+PENDING';
+                                                e.target.className = 'w-full h-auto object-contain block opacity-10';
+                                            }}
+                                        />
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </motion.div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="absolute bottom-0 left-0 w-full p-8 translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        <span className="text-plaiz text-sm font-bold uppercase tracking-wider mb-2 block">{project.category}</span>
+                                        <h3 className="text-2xl font-bold text-white mb-4">{project.title}</h3>
+                                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+                                            <ZoomIn size={18} />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </motion.div>
+                )}
+
+                {/* Empty state */}
+                {!loading && filteredProjects.length === 0 && (
+                    <div className="text-center py-24 text-slate-500">
+                        <p className="text-lg">No projects in this category yet.</p>
+                    </div>
+                )}
 
                 {/* Lightbox Modal */}
                 <AnimatePresence>
                     {selectedImage && (() => {
-                        // Normalize image list: use images array if available, else fall back to [image]
-                        const imageList = (selectedImage.images && selectedImage.images.length > 0)
-                            ? selectedImage.images
-                            : (selectedImage.image ? [selectedImage.image] : []);
+                        const imageList = getImageList(selectedImage);
                         const hasMultiple = imageList.length > 1;
-
                         return (
                             <motion.div
                                 initial={{ opacity: 0 }}
@@ -155,31 +221,24 @@ const PortfolioGrid = () => {
                                         {hasMultiple ? (
                                             <div className="flex items-center gap-4">
                                                 <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setCurrentImageIndex((prev) => prev === 0 ? imageList.length - 1 : prev - 1);
-                                                    }}
+                                                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => i === 0 ? imageList.length - 1 : i - 1); }}
                                                     className="flex-shrink-0 bg-black/50 hover:bg-black p-3 rounded-full text-white backdrop-blur-md transition-all flex items-center shadow-lg"
                                                 >
                                                     <ChevronLeft size={24} />
                                                 </button>
-
+                                                {/* Full-res in lightbox, no transform */}
                                                 <img
                                                     key={currentImageIndex}
                                                     src={imageList[currentImageIndex]}
                                                     alt={`${selectedImage.title} - image ${currentImageIndex + 1}`}
-                                                    className="flex-1 min-w-0 max-h-[60vh] w-full object-contain rounded-xl shadow-2xl transition-opacity duration-300"
+                                                    className="flex-1 min-w-0 max-h-[60vh] w-full object-contain rounded-xl shadow-2xl"
                                                     onError={(e) => {
                                                         e.target.src = 'https://via.placeholder.com/1200x800?text=IMAGE+PENDING';
                                                         e.target.className = 'flex-1 min-w-0 max-h-[60vh] w-full object-contain rounded-xl opacity-20';
                                                     }}
                                                 />
-
                                                 <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setCurrentImageIndex((prev) => prev === imageList.length - 1 ? 0 : prev + 1);
-                                                    }}
+                                                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => i === imageList.length - 1 ? 0 : i + 1); }}
                                                     className="flex-shrink-0 bg-black/50 hover:bg-black p-3 rounded-full text-white backdrop-blur-md transition-all flex items-center shadow-lg"
                                                 >
                                                     <ChevronRight size={24} />
@@ -189,7 +248,7 @@ const PortfolioGrid = () => {
                                             <img
                                                 src={imageList[0]}
                                                 alt={selectedImage.title}
-                                                className="max-h-[60vh] w-full object-contain rounded-xl shadow-2xl mx-auto block transition-opacity duration-300"
+                                                className="max-h-[60vh] w-full object-contain rounded-xl shadow-2xl mx-auto block"
                                                 onError={(e) => {
                                                     e.target.src = 'https://via.placeholder.com/1200x800?text=IMAGE+PENDING';
                                                     e.target.className = 'max-h-[60vh] w-full object-contain rounded-xl opacity-20 mx-auto block';
