@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Plus, Trash2, Image as ImageIcon, AlertCircle, X, Eye, EyeOff, Star, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
