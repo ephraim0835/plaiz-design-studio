@@ -177,31 +177,56 @@ const Admin = () => {
 
     const handleSave = async () => {
         setSaving(true);
-        setStatusText('Saving Projects...');
+        const projectsWithFiles = projects.filter(p => p.newFiles && p.newFiles.length > 0);
+        const totalUploads = projectsWithFiles.reduce((sum, p) => sum + (p.newFiles?.length || 0), 0);
+        let uploadedCount = 0;
+
+        // Helper: compress image file before upload
+        const compressImage = (file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const MAX = 1400;
+                    let { width, height } = img;
+                    if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
+                    if (height > MAX) { width = Math.round(width * MAX / height); height = MAX; }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.82);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
         try {
             const sanitize = (str) => typeof str === 'string' ? str.trim().replace(/[<>]/g, '') : str;
 
-            const updatedProjects = await Promise.all(projects.map(async (project) => {
+            // Process projects ONE AT A TIME to avoid network timeout
+            const updatedProjects = [];
+            for (const project of projects) {
                 let currentImages = [...(project.images || [])];
                 let currentCover = project.image;
 
-                // Upload new files to Supabase Storage
                 if (project.newFiles && project.newFiles.length > 0) {
                     for (const file of project.newFiles) {
-                        const fileExt = file.name.split('.').pop();
+                        uploadedCount++;
+                        setStatusText(`Uploading ${uploadedCount}/${totalUploads}...`);
+
+                        const compressed = await compressImage(file);
+                        const fileExt = 'jpg';
                         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
                         const filePath = `project-images/${fileName}`;
 
                         const { error: uploadError } = await supabase.storage
                             .from('portfolio-assets')
-                            .upload(filePath, file, {
-                                cacheControl: '3600',
-                                upsert: false
-                            });
+                            .upload(filePath, compressed, { cacheControl: '3600', upsert: false });
 
                         if (uploadError) {
                             console.error('Upload Error:', uploadError);
-                            throw new Error(`Upload Failed: ${uploadError.message}. Make sure the "portfolio-assets" bucket exists and is set to public.`);
+                            throw new Error(`Upload Failed for "${file.name}": ${uploadError.message}`);
                         }
 
                         const { data: { publicUrl } } = supabase.storage
@@ -209,33 +234,29 @@ const Admin = () => {
                             .getPublicUrl(filePath);
 
                         currentImages.push(publicUrl);
-
-                        // Log successful upload to security trail
-                        await supabase.from('security_logs').insert([{
-                            type: 'upload_accept',
-                            details: { filename: file.name, path: filePath }
-                        }]);
-                        // If currentCover is still a base64 from a preview, update it to the public URL
-                        if (currentCover?.startsWith('data:')) {
+                        if (!currentCover || currentCover.startsWith('data:')) {
                             currentCover = publicUrl;
                         }
+
+                        // Fire-and-forget security log (don't await — keeps things fast)
+                        supabase.from('security_logs').insert([{
+                            type: 'upload_accept',
+                            details: { filename: file.name, path: filePath }
+                        }]).then(() => { });
                     }
                 }
 
-                // If no cover is set but we have images, pick the first one
-                if (!currentCover && currentImages.length > 0) {
-                    currentCover = currentImages[0];
-                }
+                if (!currentCover && currentImages.length > 0) currentCover = currentImages[0];
 
                 const { previewImages, newFiles, newImages, ...cleanProject } = project;
-                return {
+                updatedProjects.push({
                     ...cleanProject,
                     title: sanitize(project.title),
                     description: sanitize(project.description),
                     images: currentImages,
                     image: currentCover
-                };
-            }));
+                });
+            }
 
             // Delete any projects the user removed locally
             if (deletedProjectIds.length > 0) {
@@ -248,23 +269,21 @@ const Admin = () => {
             }
 
             // Upsert all remaining projects to Supabase
-            const { error } = await supabase
-                .from('portfolio')
-                .upsert(updatedProjects);
-
+            const { error } = await supabase.from('portfolio').upsert(updatedProjects);
             if (error) throw error;
 
-            // Reload from source to be safe
+            // Reload from source
             const { data } = await supabase.from('portfolio').select('*').order('id', { ascending: false });
             setProjects(data || []);
-            setToast({ show: true, message: 'Projects saved successfully!', type: 'success' });
+            setToast({ show: true, message: `Saved! ${totalUploads > 0 ? `${totalUploads} image(s) uploaded.` : 'All changes applied.'}`, type: 'success' });
 
         } catch (err) {
             console.error(err);
             setToast({ show: true, message: 'Error saving: ' + (err.message || 'Unknown error'), type: 'error' });
         }
         setSaving(false);
-        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 5000);
+        setStatusText('');
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 6000);
     };
 
     const handleTSave = async () => {
@@ -412,7 +431,7 @@ const Admin = () => {
                                     disabled={saving}
                                     className="flex items-center gap-2 bg-plaiz hover:bg-plaiz-hover text-white px-6 py-2.5 rounded-xl transition-all font-medium text-sm shadow-lg shadow-plaiz/20 disabled:opacity-50"
                                 >
-                                    <Save size={18} /> {saving ? 'Saving...' : 'Save Changes'}
+                                    <Save size={18} /> {saving ? (statusText || 'Saving...') : 'Save Changes'}
                                 </button>
                             </div>
                         </div>
