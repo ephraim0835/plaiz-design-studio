@@ -40,7 +40,7 @@ const Hero = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                    className="text-6xl md:text-8xl font-extrabold tracking-tight text-white mb-8 leading-tight"
+                    className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-white mb-8 leading-tight"
                 >
                     Design That Makes Your <br className="hidden md:block" />
                     <span className="text-plaiz">
