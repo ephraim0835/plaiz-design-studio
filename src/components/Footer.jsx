@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Instagram, Linkedin, ArrowUpRight } from 'lucide-react';
+import { Instagram, ArrowUpRight } from 'lucide-react';
 
 const TikTokIcon = ({ size = 24 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -71,9 +71,6 @@ const Footer = () => {
                             </a>
                             <a href="https://www.tiktok.com/@plaiz.studio?_r=1&_d=ehde4379548kd5&sec_uid=MS4wLjABAAAAqMaWcmLFfPVX6lx1tRNvtmJ33YQ5DQM2J3poIBDwXqrhhHgkXPaot7cCzwxrqSoF&share_author_id=7613334716284879892&sharer_language=en&source=h5_m&u_code=f2996e2cekagcf&timestamp=1772797919&user_id=7613334716284879892&sec_user_id=MS4wLjABAAAAqMaWcmLFfPVX6lx1tRNvtmJ33YQ5DQM2J3poIBDwXqrhhHgkXPaot7cCzwxrqSoF&item_author_type=1&utm_source=copy&utm_campaign=client_share&utm_medium=android&share_iid=7606610240909592341&share_link_id=ccedb827-fdbd-4da7-85f2-33b003881ef6&share_app_id=1233&ugbiz_name=ACCOUNT&ug_btm=b8727%2Cb7360&social_share_type=5&enable_checksum=1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-[#0F172A] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-plaiz/20 hover:border-plaiz/50 transition-all">
                                 <TikTokIcon size={20} />
-                            </a>
-                            <a href="https://www.linkedin.com/in/ephraim-ofoli-66a5503a5?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-[#0F172A] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-plaiz/20 hover:border-plaiz/50 transition-all">
-                                <Linkedin size={20} />
                             </a>
                         </div>
                     </div>
