@@ -19,7 +19,7 @@ const thumbUrl = (url, width = 600, quality = 75) => {
 // ─── Skeleton shimmer card ────────────────────────────────────────────────────
 const SkeletonCard = () => (
     <div className="rounded-xl overflow-hidden bg-[#0F172A] border border-white/5 animate-pulse">
-        <div className="w-full aspect-square bg-slate-800/60" />
+        <div className="w-full aspect-[4/3] bg-slate-800/60" />
         <div className="p-4 space-y-2">
             <div className="h-3 bg-slate-700/60 rounded w-1/3" />
             <div className="h-4 bg-slate-700/40 rounded w-2/3" />
@@ -46,7 +46,7 @@ const LazyImage = ({ src, originalSrc, alt, className, onError }) => {
     };
 
     return (
-        <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+        <div className="relative w-full overflow-hidden">
             {!loaded && (
                 <div className="absolute inset-0 bg-slate-800/60 animate-pulse" />
             )}
@@ -168,16 +168,16 @@ const PortfolioGrid = () => {
                                     className="group relative rounded-xl overflow-hidden cursor-pointer bg-[#0F172A] border border-white/5 hover:border-white/20 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300"
                                     onClick={() => { setSelectedImage(project); setCurrentImageIndex(0); }}
                                 >
-                                    <div className="w-full aspect-square bg-slate-800/20 p-2 flex items-center justify-center">
+                                    <div className="w-full overflow-hidden bg-slate-800/20">
                                         {/* Serve a compressed thumbnail (600px wide WebP) for the grid, with fallback to original */}
                                         <LazyImage
                                             src={thumbUrl(project.image, 600, 75)}
                                             originalSrc={project.image}
                                             alt={project.title}
-                                            className="w-full h-full object-contain block transition-transform duration-700 group-hover:scale-105"
+                                            className="w-full h-auto block transition-transform duration-700 group-hover:scale-105"
                                             onError={(e) => {
                                                 e.target.src = 'https://via.placeholder.com/600x450?text=IMAGE+PENDING';
-                                                e.target.className = 'w-full h-full object-contain block opacity-10';
+                                                e.target.className = 'w-full h-auto block opacity-10';
                                             }}
                                         />
                                     </div>
