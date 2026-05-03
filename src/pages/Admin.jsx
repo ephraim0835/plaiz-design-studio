@@ -26,7 +26,7 @@ const Admin = () => {
     const [deletedTestimonialIds, setDeletedTestimonialIds] = useState([]);
     const [deletedProjectIds, setDeletedProjectIds] = useState([]);
 
-    const categories = ['YouTube Thumbnails', 'Social Media Posts', 'Logos', 'Flyers', 'Branding', 'Packaging', 'Cards', 'Mockups'];
+    const categories = ['YouTube Thumbnails', 'Social Media Posts', 'Logos', 'Flyers', 'Branding', 'Cards'];
 
     useEffect(() => {
         const loadAllData = async () => {
