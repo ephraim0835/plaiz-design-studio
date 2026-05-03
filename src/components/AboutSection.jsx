@@ -45,7 +45,7 @@ const AboutSection = () => {
 
                         <div className="flex items-center gap-4">
                             <div className="flex -space-x-4">
-                                {['/clients/delicias.png', '/clients/zem.png', '/clients/novelty.png'].map((src, i) => (
+                                {['/clients/delicias.png', '/clients/zem.png', '/clients/hamdaway.png'].map((src, i) => (
                                     <div key={i} className="w-12 h-12 rounded-full border-2 border-[#020617] bg-white flex items-center justify-center relative overflow-hidden">
                                         <img src={src} alt="Client logo" className="w-full h-full object-contain p-1.5" />
                                     </div>
