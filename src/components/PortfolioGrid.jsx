@@ -117,7 +117,7 @@ const PortfolioGrid = () => {
             ? project.images
             : (project.image ? [project.image] : []);
 
-    const filters = ['All', 'YouTube Thumbnails', 'Social Media Posts', 'Logos', 'Flyers', 'Branding', 'Cards'];
+    const filters = ['All', 'YouTube Thumbnails', 'Social Media Posts', 'Logos', 'Flyers', 'Branding'];
     const filteredProjects = activeFilter === 'All' ? projects : projects.filter(p => p.category === activeFilter);
 
     return (
