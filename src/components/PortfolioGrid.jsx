@@ -128,7 +128,7 @@ const PortfolioGrid = () => {
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
                     <div>
                         <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Our Work</h2>
-                        <p className="text-slate-400 text-lg max-w-lg">Logos, flyers, packaging, social media graphics, and more — designed for brands that want to stand out.</p>
+                        <p className="text-slate-400 text-lg max-w-lg">YouTube thumbnails, logos, flyers, social media graphics, and more — designed for creators that want better CTR and brands that want to stand out.</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {filters.map(filter => (

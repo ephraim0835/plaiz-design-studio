@@ -7,7 +7,7 @@ const Portfolio = () => {
             <div className="text-center max-w-3xl mx-auto px-6 mb-12">
                 <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6">Studio <span className="text-transparent bg-clip-text bg-gradient-to-r from-plaiz to-blue-400">Portfolio</span></h1>
                 <p className="text-xl text-slate-300">
-                    A selection of our recent work — logos, flyers, packaging, social graphics, and more.
+                    A selection of our recent work — YouTube thumbnails, logos, flyers, social graphics, and more.
                 </p>
             </div>
 
