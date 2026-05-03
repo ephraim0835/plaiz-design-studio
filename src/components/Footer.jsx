@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Instagram, ArrowUpRight } from 'lucide-react';
+import CTAButton from './CTAButton';
 
 const TikTokIcon = ({ size = 24 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,9 +24,10 @@ const Footer = () => {
                             <img src="/logo.png" alt="PLAIZ STUDIO" className="w-10 h-10 object-contain drop-shadow-[0_4px_16px_rgba(0,114,255,0.3)]" />
                             PLAIZ STUDIO
                         </Link>
-                        <p className="text-slate-400 max-w-sm text-lg leading-relaxed">
+                        <p className="text-slate-400 max-w-sm text-lg leading-relaxed mb-6">
                             Bold design for brands that mean business. Logos, flyers, packaging, and more.
                         </p>
+                        <CTAButton type="whatsapp" text="Hire Me" />
                     </div>
 
                     <div>

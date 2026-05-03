@@ -18,7 +18,7 @@ const Portfolio = () => {
                     <h2 className="text-3xl font-bold text-white mb-4">Have something in mind?</h2>
                     <p className="text-slate-400 mb-8">Send us a message on WhatsApp and let's get started.</p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <CTAButton type="whatsapp" text="Start a Project" />
+                        <CTAButton type="whatsapp" text="Work With Me" />
                     </div>
                 </div>
             </section>

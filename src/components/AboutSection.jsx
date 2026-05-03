@@ -36,11 +36,10 @@ const AboutSection = () => {
                             More Than Just A <span className="text-transparent bg-clip-text bg-gradient-to-r from-plaiz to-blue-400">Design Studio</span>
                         </h2>
                         <p className="text-lg text-slate-300 mb-6 leading-relaxed">
-                            At Plaiz Studio, we believe great design is the difference between being seen and being remembered.
-                            Every piece we create is intentional — built to reflect your brand, connect with your audience, and make an impact.
+                            I help brands and creators stand out through visual design, specializing in YouTube thumbnails and digital content. Every piece we create is intentional — built to reflect your brand, connect with your audience, and make an impact.
                         </p>
                         <p className="text-lg text-slate-300 leading-relaxed mb-8">
-                            Whether you're a student launching your first idea, a small business building credibility, or a growing brand
+                            Whether you're a creator looking for higher engagement, a small business building credibility, or a growing brand
                             ready to level up — Plaiz Studio is here to make it real.
                         </p>
 

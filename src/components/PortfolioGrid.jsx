@@ -117,7 +117,7 @@ const PortfolioGrid = () => {
             ? project.images
             : (project.image ? [project.image] : []);
 
-    const filters = ['All', 'Logos', 'Branding', 'Flyers', 'Packaging', 'Social Media Post', 'Cards', 'Mockups'];
+    const filters = ['All', 'YouTube Thumbnails', 'Social Media Posts', 'Logos', 'Flyers', 'Branding', 'Packaging', 'Cards', 'Mockups'];
     const filteredProjects = activeFilter === 'All' ? projects : projects.filter(p => p.category === activeFilter);
 
     return (
@@ -184,7 +184,10 @@ const PortfolioGrid = () => {
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                     <div className="absolute bottom-0 left-0 w-full p-8 translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         <span className="text-plaiz text-sm font-bold uppercase tracking-wider mb-2 block">{project.category}</span>
-                                        <h3 className="text-2xl font-bold text-white mb-4">{project.title}</h3>
+                                        <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>
+                                        {project.description && (
+                                            <p className="text-slate-300 text-sm mb-4 line-clamp-2 leading-relaxed">{project.description}</p>
+                                        )}
                                         <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                                             <ZoomIn size={18} />
                                         </div>

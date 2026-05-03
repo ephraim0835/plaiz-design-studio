@@ -42,9 +42,9 @@ const Hero = () => {
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                     className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-white mb-8 leading-tight"
                 >
-                    Design That Makes Your <br className="hidden md:block" />
+                    I design high-impact visuals <br className="hidden md:block" />
                     <span className="text-plaiz">
-                        Brand Unforgettable.
+                        for brands and creators.
                     </span>
                 </motion.h1>
 
@@ -54,7 +54,7 @@ const Hero = () => {
                     transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
                     className="text-xl md:text-2xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed"
                 >
-                    We create bold visuals and strong brand identities for students, entrepreneurs, and businesses that are ready to be remembered.
+                    Focused on YouTube thumbnails and digital content design that helps increase attention and engagement.
                 </motion.p>
 
                 <motion.div
@@ -63,8 +63,8 @@ const Hero = () => {
                     transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                    <CTAButton type="whatsapp" text="Start a Project" />
-                    <CTAButton type="email" text="Send an Email" />
+                    <CTAButton type="whatsapp" text="Work With Me" />
+                    <CTAButton type="email" text="Hire Me" />
                 </motion.div>
             </div>
 
